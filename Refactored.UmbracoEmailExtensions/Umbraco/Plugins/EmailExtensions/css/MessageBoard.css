@@ -1,0 +1,253 @@
+﻿/* Start List Formatting */
+.messageBrowser {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.messageContainer
+{
+    border: solid 1px #ccc;
+    border-radius: 6px;
+}
+
+.messageBrowser .filter {
+    position: absolute;
+    top: 15px;
+    right: 10px;
+    left: 10px;
+}
+
+.messageBrowser .listingWrapper {
+    position: absolute;
+    right: 10px;
+    bottom: 60%;
+    margin-bottom: 5px;
+    left: 10px;
+    top: 45px;
+    overflow: scroll;
+}
+table.listing 
+{
+    margin: 0;
+    padding: 0;
+    table-layout: fixed;
+}
+
+table.listing th 
+{
+    white-space:nowrap;
+    vertical-align: bottom;
+    border-bottom: solid 1px #999999;
+    padding-bottom: .2em;
+}
+
+tr.alternate, tr.alternate td 
+{
+    background-color:#F7F6FA;
+}
+
+tr.selected, tr.selected td 
+{
+    background-color:#cfffd5;
+}
+
+tr.archived, tr.archived td 
+{
+    color:#999999;
+}
+
+tr.new, tr.new td 
+{
+    color:#00096c;
+    font-weight: bold;
+}
+
+tr.read, tr.read td 
+{
+    color:#000000;
+    font-weight: normal;
+
+}td.bool
+{
+    text-align: center;
+}
+
+td.numeric, td.currency, td.date
+{
+    text-align: right;
+}
+
+td.date, td.datetime, td.datePending, td.dateOverdue {
+    width: 130px;
+    max-width: 130px;
+    text-align:center;
+}
+
+td.dateOverdue {
+    color: #f00;
+    font-weight: bold;
+}
+
+td.datePending {
+    color: #e2390a;
+    font-weight: normal;
+}
+
+td.actions, th.actions {
+    width: 58px;
+    max-width: 58px;
+    text-align: left;
+    white-space:nowrap;
+}
+
+td.numeric, th.numeric {
+    width: 50px;
+    max-width: 50px;
+}
+
+/* End List Formatting */
+input[type='date'], .date {
+    width: 65px;
+}
+/* Start Confirmation Box Formatting */
+div.confirmBox {
+    position: absolute;
+    top: 40%;
+    margin-top: 15px;
+    left: 20px;
+    right: 20px;
+
+    border: solid 4px #ff6a00;
+    background-color: #ffc04d;
+    padding: 10px;
+    margin: 10px 0px;
+    font-size: 1.5em;
+    z-index: 1000;
+}
+
+div.confirmBox div {
+    text-align: center;
+}
+
+div.confirmBox input {
+    margin: 4px 10px;
+    font-size: 1.5em;
+}
+/* End Confirmation Box Formatting */
+
+div.messageView, div.replyView
+{
+    position: absolute;
+    top: 40%;
+    bottom: 5px;
+    margin-top: 5px;
+    left: 10px;
+    right: 10px;
+}
+
+/*div.messageView
+{
+    margin-right: 5px;
+    left: 10px;
+    right: 50%;
+}
+
+div.replyView
+{
+    margin-left: 5px;
+    right: 10px;
+    left: 50%;
+}*/
+
+.messageContainer fieldset {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    bottom: 10px;
+    right: 10px;
+
+    border: none;
+    min-height: 200px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+    .messageContainer fieldset legend
+    {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin: 0;
+        margin-left: -6px;
+        padding: 0;
+    }
+
+    .messageContainer fieldset label
+    {
+        display: inline-block;
+        width: 60px;
+        font-weight: bold;
+        background-color: #F7F6FA;
+        margin: 2px;
+        margin-right: 5px;
+        text-align: right;
+    }
+
+    .messageContainer fieldset span
+    {
+        display: inline-block;
+        min-width: 120px;
+    }
+
+    .messageContainer fieldset input[type=text]
+    {
+        width: 70%;
+    }
+
+    .messageContainer fieldset textarea
+    {
+        width: 96%;
+        min-height: 100px;
+        margin-top: 10px;
+    }
+    .messageContainer fieldset .messageBody
+    {
+        position: absolute;
+        bottom: 10px;
+        top: 140px;
+        right: 4px;
+        left: 10px;
+        border: solid 1px #999999;
+        overflow: hidden;
+        overflow-y: scroll;
+        padding: 4px;
+    }
+    
+
+    .messageContainer fieldset ol, .messageContainer fieldset ol li
+    {
+        margin: 0;
+        padding: 0;
+    }
+
+    .messageContainer fieldset ol
+    {
+        list-style: none;
+        display: block;
+        width: 100%;
+    }
+
+    .messageContainer fieldset ol li
+    {
+        list-style: none;
+        line-height: 2em;
+        display: block;
+    }
+
+    .messageContainer fieldset ol li.buttons {
+        float: right;
+        padding-top: 5px;
+        padding-right: 20px;
+    }

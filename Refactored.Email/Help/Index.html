@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+<title>Refactored.Email Class Library - Table of Content</title>
+<link rel="stylesheet" href="TOC.css">
+<link rel="shortcut icon" href="favicon.ico"/>
+<script type="text/javascript" src="TOC.js"></script>
+</head>
+
+<body onload="javascript: Initialize();" onresize="javascript: ResizeTree();">
+<form id="IndexForm" runat="server">
+
+<div id="TOCDiv" class="TOCDiv">
+
+<div id="divSearchOpts" class="SearchOpts" style="height: 100px; display: none;">
+<img class="TOCLink" onclick="javascript: ShowHideSearch(false);"
+    src="CloseSearch.png" height="16" width="16" alt="Hide search" style="float: right;"/>
+Keyword(s) for which to search:
+<input id="txtSearchText" type="text" style="width: 100%;"
+  onkeypress="javascript: return OnSearchTextKeyPress(event);" /><br />
+<input id="chkSortByTitle" type="checkbox" /><label for="chkSortByTitle">&nbsp;Sort results by title</label><br />
+<input type="button" value="Search" onclick="javascript: return PerformSearch();" />
+</div>
+
+<div id="divIndexOpts" class="IndexOpts" style="height: 25px; display: none;">
+<img class="TOCLink" onclick="javascript: ShowHideIndex(false);"
+    src="CloseSearch.png" height="17" width="17" alt="Hide index" style="float: right;"/>
+Keyword Index
+</div>
+
+<div id="divNavOpts" class="NavOpts" style="height: 20px;">
+    <img class="TOCLink" onclick="javascript: SyncTOC();" src="SyncTOC.gif"
+        height="16" width="16" alt="Sync to TOC"/>
+    <img class="TOCLink" onclick="javascript: ExpandOrCollapseAll(true);"
+        src="ExpandAll.bmp" height="16" width="16" alt="Expand all "/>
+    <img class="TOCLink" onclick="javascript: ExpandOrCollapseAll(false);"
+        src="CollapseAll.bmp" height="16" width="16" alt="Collapse all" />
+</div>
+
+<div class="Tree" id="divSearchResults" style="display: none;"
+    onselectstart="javascript: return false;">
+</div>
+
+<div class="Tree" id="divIndexResults" style="display: none;"
+    onselectstart="javascript: return false;">
+</div>
+
+<div class="Tree" id="divTree" onselectstart="javascript: return false;">
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/25c03bad-abe6-26ff-882b-3429712397c6.htm" target="TopicContent">Refactored.Email Namespace</a>
+<div class="Hidden">
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/a68dbf39-33f2-db86-3bc4-7bb846ee6fe4.htm" target="TopicContent">Email Class</a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/48d7152f-6fff-3043-7f69-b0961c1c672a.htm" target="TopicContent">Email Members</a>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/b2c50c9b-bbe6-ef02-115b-b4f5241619da.htm" target="TopicContent">Email Methods</a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/46b41215-27af-a3c4-6170-1ef9b034fbaa.htm" target="TopicContent">GetMessageTemplate Method </a>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/e8dfaad5-d7c4-4c29-1f1a-e00f0e26a20e.htm" target="TopicContent">ParseMessageTemplate Method </a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/2cfbc9de-946a-a2fc-d36a-962a856bfde1.htm" target="TopicContent">ParseMessageTemplate Method (String, IOrderedDictionary)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/52c1f5d4-d2cc-da68-c228-b98d0d938151.htm" target="TopicContent">ParseMessageTemplate Method (String, NameValueCollection)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/ff979a85-3bbf-27fb-60e0-3ce4eda41778.htm" target="TopicContent">ParseMessageTemplate Method (String, IOrderedDictionary, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/9eda8121-217c-6447-bee2-1639ca06a579.htm" target="TopicContent">ParseMessageTemplate Method (String, NameValueCollection, String)</a>
+</div>
+</div>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/8d405947-6e1c-3bfa-7cbf-b29ccb66c70e.htm" target="TopicContent">ParseMessageTemplateContent Method </a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/8687d097-6c92-1e8c-8ab4-654c2cae460b.htm" target="TopicContent">ParseMessageTemplateContent Method (String, IOrderedDictionary)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/64b7858c-0d13-8a39-79b1-d811621a83cd.htm" target="TopicContent">ParseMessageTemplateContent Method (String, NameValueCollection)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/6083acc8-1a9f-4b51-ad38-f0b1a36a1a83.htm" target="TopicContent">ParseMessageTemplateContent Method (String, IOrderedDictionary, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/84dabe80-61cc-d8ae-2500-d6f890832db5.htm" target="TopicContent">ParseMessageTemplateContent Method (String, NameValueCollection, String)</a>
+</div>
+</div>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/be815932-94cc-b36d-1279-edb8109f60aa.htm" target="TopicContent">PrepareAlternateView Method </a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/ef3b8296-3970-17ac-9554-93d05fb5735d.htm" target="TopicContent">PrepareAlternateView Method (String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/e6e0f96a-28c0-d6d6-a569-f388553798f0.htm" target="TopicContent">PrepareAlternateView Method (String, String)</a>
+</div>
+</div>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/72ec4528-c476-1028-c3a3-02abf67d7858.htm" target="TopicContent">SendEmail Method </a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/9216b91b-bbc2-b2f3-fe1c-2c3b72e71538.htm" target="TopicContent">SendEmail Method (String, MailAddressCollection, String, String, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/b1b9d83c-0c80-f1fb-32f0-7ef130a74b98.htm" target="TopicContent">SendEmail Method (String, String, String, String, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/dca55507-8e51-9380-a994-f16de430605c.htm" target="TopicContent">SendEmail Method (String, MailAddressCollection, MailAddressCollection, String, String, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/ac16f280-e508-b882-7d3e-f110331132fb.htm" target="TopicContent">SendEmail Method (String, String, String, String, String, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/23dff168-b5eb-08b1-5934-e90a4bc5240a.htm" target="TopicContent">SendEmail Method (String, MailAddressCollection, MailAddressCollection, MailAddressCollection, String, String, String)</a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/f3ff14df-d3fb-0a30-9aba-b4cc40011e82.htm" target="TopicContent">SendEmail Method (String, String, String, String, String, String, String)</a>
+</div>
+</div>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/fb3e3a1c-3358-55a2-7a1e-56d5375a2b7e.htm" target="TopicContent">ValidateEmailAddress Method </a>
+</div>
+</div>
+</div>
+<div class="TreeNode">
+<img class="TreeNodeImg" onclick="javascript: Toggle(this);" src="Collapsed.gif"/><a class="UnselectedNode" onclick="javascript: return Expand(this);" href="html/6b0916d3-7f00-a4d2-a1c5-9c4dc9dd5b29.htm" target="TopicContent">Email Properties</a>
+<div class="Hidden">
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/b73c6ac3-4709-0a8f-85ae-cca1ad5c2821.htm" target="TopicContent">Attachments Property </a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/76fd4f06-a6be-e5c0-9da3-496cf8851b04.htm" target="TopicContent">EnableSsl Property </a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/cebbdf85-5eb9-6b90-974f-b8f6cbaf4930.htm" target="TopicContent">FieldPattern Property </a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/f22dd4cb-3b1e-9954-8401-c2c50ee89d59.htm" target="TopicContent">LinkWebImages Property </a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/a7800f77-3849-1db2-2ca1-45403a4cb114.htm" target="TopicContent">MailTemplateDirectory Property </a>
+</div>
+<div class="TreeItem">
+<img src="Item.gif"/><a class="UnselectedNode" onclick="javascript: return SelectNode(this);" href="html/4bc5f220-01bf-1d3d-7940-63b618adb306.htm" target="TopicContent">WebBaseUrl Property </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="TOCSizer" class="TOCSizer" onmousedown="OnMouseDown(event)" onselectstart="javascript: return false;"></div>
+
+<iframe id="TopicContent" name="TopicContent" class="TopicContent" src="html/25c03bad-abe6-26ff-882b-3429712397c6.htm">
+This page uses an IFRAME but your browser does not support it.
+</iframe>
+
+</form>
+
+</body>
+
+</html>

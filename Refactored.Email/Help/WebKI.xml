@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<HelpKI>
+
+  <HelpKINode Title="Attachments property" Url="html/b73c6ac3-4709-0a8f-85ae-cca1ad5c2821.htm" />
+  <HelpKINode Title="Email class" Url="html/48d7152f-6fff-3043-7f69-b0961c1c672a.htm" />
+  <HelpKINode Title="Email class" Url="html/a68dbf39-33f2-db86-3bc4-7bb846ee6fe4.htm" />
+  <HelpKINode Title="Email class">
+    <HelpKINode Title="about Email class" Url="html/a68dbf39-33f2-db86-3bc4-7bb846ee6fe4.htm" />
+    <HelpKINode Title="all members" Url="html/48d7152f-6fff-3043-7f69-b0961c1c672a.htm" />
+    <HelpKINode Title="methods" Url="html/b2c50c9b-bbe6-ef02-115b-b4f5241619da.htm" />
+    <HelpKINode Title="properties" Url="html/6b0916d3-7f00-a4d2-a1c5-9c4dc9dd5b29.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Email.Attachments property" Url="html/b73c6ac3-4709-0a8f-85ae-cca1ad5c2821.htm" />
+  <HelpKINode Title="Email.EnableSsl property" Url="html/76fd4f06-a6be-e5c0-9da3-496cf8851b04.htm" />
+  <HelpKINode Title="Email.FieldPattern property" Url="html/cebbdf85-5eb9-6b90-974f-b8f6cbaf4930.htm" />
+  <HelpKINode Title="Email.GetMessageTemplate method" Url="html/46b41215-27af-a3c4-6170-1ef9b034fbaa.htm" />
+  <HelpKINode Title="Email.LinkWebImages property" Url="html/f22dd4cb-3b1e-9954-8401-c2c50ee89d59.htm" />
+  <HelpKINode Title="Email.MailTemplateDirectory property" Url="html/a7800f77-3849-1db2-2ca1-45403a4cb114.htm" />
+  <HelpKINode Title="Email.ParseMessageTemplate method" Url="html/e8dfaad5-d7c4-4c29-1f1a-e00f0e26a20e.htm" />
+  <HelpKINode Title="Email.ParseMessageTemplateContent method" Url="html/8d405947-6e1c-3bfa-7cbf-b29ccb66c70e.htm" />
+  <HelpKINode Title="Email.PrepareAlternateView method" Url="html/be815932-94cc-b36d-1279-edb8109f60aa.htm" />
+  <HelpKINode Title="Email.SendEmail method" Url="html/72ec4528-c476-1028-c3a3-02abf67d7858.htm" />
+  <HelpKINode Title="Email.ValidateEmailAddress method" Url="html/fb3e3a1c-3358-55a2-7a1e-56d5375a2b7e.htm" />
+  <HelpKINode Title="Email.WebBaseUrl property" Url="html/4bc5f220-01bf-1d3d-7940-63b618adb306.htm" />
+  <HelpKINode Title="EnableSsl property" Url="html/76fd4f06-a6be-e5c0-9da3-496cf8851b04.htm" />
+  <HelpKINode Title="FieldPattern property" Url="html/cebbdf85-5eb9-6b90-974f-b8f6cbaf4930.htm" />
+  <HelpKINode Title="GetMessageTemplate method" Url="html/46b41215-27af-a3c4-6170-1ef9b034fbaa.htm" />
+  <HelpKINode Title="LinkWebImages property" Url="html/f22dd4cb-3b1e-9954-8401-c2c50ee89d59.htm" />
+  <HelpKINode Title="MailTemplateDirectory property" Url="html/a7800f77-3849-1db2-2ca1-45403a4cb114.htm" />
+  <HelpKINode Title="ParseMessageTemplate method" Url="html/e8dfaad5-d7c4-4c29-1f1a-e00f0e26a20e.htm" />
+  <HelpKINode Title="ParseMessageTemplateContent method" Url="html/8d405947-6e1c-3bfa-7cbf-b29ccb66c70e.htm" />
+  <HelpKINode Title="PrepareAlternateView method" Url="html/be815932-94cc-b36d-1279-edb8109f60aa.htm" />
+  <HelpKINode Title="Refactored.Email namespace" Url="html/25c03bad-abe6-26ff-882b-3429712397c6.htm" />
+  <HelpKINode Title="Refactored.Email.Email class" Url="html/48d7152f-6fff-3043-7f69-b0961c1c672a.htm" />
+  <HelpKINode Title="Refactored.Email.Email class" Url="html/a68dbf39-33f2-db86-3bc4-7bb846ee6fe4.htm" />
+  <HelpKINode Title="SendEmail method" Url="html/72ec4528-c476-1028-c3a3-02abf67d7858.htm" />
+  <HelpKINode Title="ValidateEmailAddress method" Url="html/fb3e3a1c-3358-55a2-7a1e-56d5375a2b7e.htm" />
+  <HelpKINode Title="WebBaseUrl property" Url="html/4bc5f220-01bf-1d3d-7940-63b618adb306.htm" />
+</HelpKI>

@@ -1,0 +1,10 @@
+﻿<dashBoard>
+  <section alias="MessageCenterDashboard">
+    <areas>
+      <area>content</area>
+    </areas>
+    <tab caption="Messages">
+      <control>/umbraco/plugins/EmailExtensions/Dashboard/Messageboard.ascx</control>
+    </tab>
+  </section>
+</dashBoard>

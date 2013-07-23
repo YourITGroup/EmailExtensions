@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HelpCollection[]>
+<HelpCollection DTDVersion="1.0" FileVersion="1.0.0.0" LangId="1033" Title="Refactored.Email Class Library" Copyright="Copyright 2010 R &amp; E Foster &amp; Associates; All Rights Reserved">
+  <TOCDef File="Refactored.Email.HxT" />
+  <KeywordIndexDef File="Refactored.Email_A.HxK" />
+  <KeywordIndexDef File="Refactored.Email_B.HxK" />
+  <KeywordIndexDef File="Refactored.Email_F.HxK" />
+  <KeywordIndexDef File="Refactored.Email_K.HxK" />
+  <KeywordIndexDef File="Refactored.Email_NamedURLIndex.HxK" />
+  <KeywordIndexDef File="Refactored.Email_S.HxK" />
+  <ItemMoniker Name="!DefaultTOC" ProgId="HxDs.HxHierarchy" InitData="Refactored.Email" />
+  <ItemMoniker Name="!DefaultFullTextSearch" ProgId="HxDs.HxFullTextSearch" InitData="FTS" />
+  <ItemMoniker Name="!DefaultAssociativeIndex" ProgId="HxDs.HxIndex" InitData="A" />
+  <ItemMoniker Name="!DefaultDynamicLinkIndex" ProgId="HxDs.HxIndex" InitData="B" />
+  <ItemMoniker Name="!DefaultContextWindowIndex" ProgId="HxDs.HxIndex" InitData="F" />
+  <ItemMoniker Name="!DefaultKeywordIndex" ProgId="HxDs.HxIndex" InitData="K" />
+  <ItemMoniker Name="!DefaultNamedUrlIndex" ProgId="HxDs.HxIndex" InitData="NamedUrlIndex" />
+  <ItemMoniker Name="!DefaultSearchWindowIndex" ProgId="HxDs.HxIndex" InitData="S" />
+</HelpCollection>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>$id$</id>
+        <version>$version$</version>
+        <title>Refactored.Email</title>
+        <authors>Robert Foster</authors>
+        <owners>R &amp; E Foster &amp; Associates Pty Ltd</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</description>
+        <summary>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</summary>
+        <copyright>Copyright 2011-2013 R &amp; E Foster &amp; Associates Pty Ltd</copyright>
+        <releaseNotes>
+<![CDATA[Email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities
+        
+!Important!        
+Version 1.3.0.0 introduces breaking changes to the Email.SendEmail method in that the method parameter list has been reordered to better support optional parameters.
+]]>
+</releaseNotes>
+        
+        <language />
+      <iconUrl>http://apps.refactored.com.au/assets/Refactored_32.png</iconUrl>
+      <tags>Email MailMerge Template</tags>
+    </metadata>
+</package>
