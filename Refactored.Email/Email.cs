@@ -186,6 +186,94 @@ namespace Refactored.Email
         }
 
         /// <summary>
+        /// Sends an email Asynchronously with a Html body and an alternate Text body.
+        /// </summary>
+        /// <param name="from">From email address</param>
+        /// <param name="to">To email addresses, separated by ";"</param>
+        /// <param name="subject">Email subject</param>
+        /// <param name="htmlBody">HTML formatted content</param>
+        /// <param name="plainBody">Plain text formatted content</param>
+        /// <param name="cc">CC email addresses, separated by ";"</param>
+        /// <param name="bcc">BCC email addresses, separated by ";"</param>
+        public static void SendEmailAsync(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "")
+        {
+            if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
+            {
+                throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
+            }
+
+            using (MailMessage message = new MailMessage())
+            {
+                if (!string.IsNullOrEmpty(from))
+                    message.From = new MailAddress(from);
+
+                if (!string.IsNullOrEmpty(to))
+                    foreach (string email in to.Split(new char[] { ';' }))
+                        // Set the Bcc address of the mail message
+                        if (email.Trim() != string.Empty)
+                            message.To.Add(new MailAddress(email));
+
+                if (!string.IsNullOrEmpty(cc))
+                    foreach (string email in cc.Split(new char[] { ';' }))
+                        // Set the Bcc address of the mail message
+                        if (email.Trim() != string.Empty)
+                            message.CC.Add(new MailAddress(email));
+
+                if (!string.IsNullOrEmpty(bcc))
+                    foreach (string email in bcc.Split(new char[] { ';' }))
+                        // Set the Bcc address of the mail message
+                        if (email.Trim() != string.Empty)
+                            message.Bcc.Add(new MailAddress(email));
+                message.Subject = subject;
+                message.BodyEncoding = Encoding.UTF8;
+                PrepareBody(message, htmlBody, plainBody);
+
+                SmtpClient smtpClient = new SmtpClient { EnableSsl = Email.EnableSsl };
+                smtpClient.SendAsync(message, null);
+            }
+        }
+
+        /// <summary>
+        /// Sends an Email asynchronously with a Html body and an alternate Text body.
+        /// </summary>
+        /// <param name="from">From email address</param>
+        /// <param name="to">Collection of Email Addresses to send the email to</param>
+        /// <param name="subject">Email subject</param>
+        /// <param name="htmlBody">HTML formatted content</param>
+        /// <param name="plainBody">Plain text formatted content</param>
+        /// <param name="cc">Collection of Email Addresses to copy the email to</param>
+        /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
+        public static void SendEmailAsync(string from, MailAddressCollection to, string subject,
+            string htmlBody, string plainBody,
+            MailAddressCollection cc = null, MailAddressCollection bcc = null)
+        {
+            if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
+            {
+                throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
+            }
+            using (MailMessage message = new MailMessage())
+            {
+                if (!string.IsNullOrEmpty(from))
+                    message.From = new MailAddress(from);
+
+                foreach (MailAddress ma in to)
+                    message.To.Add(ma);
+                if (cc != null)
+                    foreach (MailAddress ma in cc)
+                        message.CC.Add(ma);
+                if (bcc != null)
+                    foreach (MailAddress ma in bcc)
+                        message.Bcc.Add(ma);
+                message.Subject = subject;
+                message.BodyEncoding = Encoding.UTF8;
+                PrepareBody(message, htmlBody, plainBody);
+
+                SmtpClient smtpClient = new SmtpClient { EnableSsl = Email.EnableSsl };
+                smtpClient.SendAsync(message, null);
+            }
+        }
+
+        /// <summary>
         /// Prepares a plain text email view.
         /// </summary>
         /// <param name="content">Plain Text content</param>

@@ -154,3 +154,4 @@ $RECYCLE.BIN/
 /Refactored.UmbracoEmailExtensions/packages
 /Refactored.Email/Help/Refactored.Email.chm
 /Refactored.Email/Help/Refactored.Email.chm.zip
+*.nupkg
