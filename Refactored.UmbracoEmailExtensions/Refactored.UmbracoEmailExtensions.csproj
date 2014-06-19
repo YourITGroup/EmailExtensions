@@ -296,8 +296,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd "$(ProjectDir)"
-.nuget\NuGet.exe pack -Verbosity detailed -NonInteractive -Prop Configuration=Release
-xcopy *.nupkg C:\LocalNuGet /Y</PostBuildEvent>
+"$(SolutionDir).nuget\NuGet.exe" pack -Verbosity detailed -NonInteractive -Prop Configuration=Release
+"$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ProjectExtensions>
