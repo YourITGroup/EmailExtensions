@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Refactored.Email")]
 [assembly: AssemblyDescription("SMTP Mail with Template and Mail Merge support")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("R & E Foster & Associates Pty Ltd")]
+[assembly: AssemblyCompany("Digitalsmith Pty Ltd")]
 [assembly: AssemblyProduct("Refactored.Email")]
-[assembly: AssemblyCopyright("Copyright © R & E Foster & Associates Pty Ltd 2008 - 2011")]
+[assembly: AssemblyCopyright("Copyright © Digitalsmith 2008 - 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

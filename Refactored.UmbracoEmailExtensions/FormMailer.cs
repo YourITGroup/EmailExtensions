@@ -15,7 +15,7 @@ namespace Refactored.UmbracoEmailExtensions
         public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true)
         {
             ISubmitDetails details = form as ISubmitDetails;
-            if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
+            //if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
 
             Dictionary<object, object> contextItems = getCurrentContextItems();
             HttpContext Context = HttpContext.Current;
@@ -33,56 +33,58 @@ namespace Refactored.UmbracoEmailExtensions
                 else
                     Refactored.Email.Email.FieldDelimiters = "[]";
 
-                string subject = string.Empty;
-                string htmlBody = string.Empty;
-                string textBody = string.Empty;
-                if (details.HtmlTemplateId > 0)
+                if (details != null && details.HtmlTemplateId > 0 && details.TextTemplateId > 0)
                 {
-                    htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                        context.RenderTemplate(details.HtmlTemplateId).ToString(),
-                        form, out subject);
-                }
-
-                if (details.TextTemplateId > 0)
-                {
-                    textBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                        context.RenderTemplate(details.TextTemplateId).ToString(),
-                        form);
-
-                    if (string.IsNullOrEmpty(subject))
-                        subject = new Node(details.TextTemplateId).Name;
-                }
-
-                Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
-                if (saveMessage)
-                    MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
-
-                if (confirm != null)
-                {
-                    if (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0)
+                    string subject = string.Empty;
+                    string htmlBody = string.Empty;
+                    string textBody = string.Empty;
+                    if (details.HtmlTemplateId > 0)
                     {
-                        htmlBody = string.Empty;
-                        textBody = string.Empty;
-                        if (confirm.HtmlConfirmationTemplateId > 0)
-                        {
-                            htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
-                                form, out subject);
-                        }
-
-                        if (confirm.TextConfirmationTemplateId > 0)
-                        {
-                            textBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
-                                form);
-
-                            if (string.IsNullOrEmpty(subject))
-                                subject = new Node(confirm.TextConfirmationTemplateId).Name;
-                        }
-
-                        Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
+                        htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(details.HtmlTemplateId).ToString(),
+                            form, out subject);
                     }
 
+                    if (details.TextTemplateId > 0)
+                    {
+                        textBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(details.TextTemplateId).ToString(),
+                            form);
+
+                        if (string.IsNullOrEmpty(subject))
+                            subject = new Node(details.TextTemplateId).Name;
+                    }
+
+
+                    Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+                    if (saveMessage)
+                        MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
+                }
+
+                if (confirm != null && confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0)
+                {
+                    string htmlBody = string.Empty;
+                    string textBody = string.Empty;
+                    string subject = string.Empty;
+
+                    if (confirm.HtmlConfirmationTemplateId > 0)
+                    {
+                        htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
+                            form, out subject);
+                    }
+
+                    if (confirm.TextConfirmationTemplateId > 0)
+                    {
+                        textBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
+                            form);
+
+                        if (string.IsNullOrEmpty(subject))
+                            subject = new Node(confirm.TextConfirmationTemplateId).Name;
+                    }
+
+                    Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
                 }
             }
             finally

@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Refactored.Email</RootNamespace>
     <AssemblyName>Refactored.Email</AssemblyName>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Refactored.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -67,7 +68,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Refactored.Email.nuspec" />
-    <None Include="Refactored.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -93,7 +93,11 @@
   <PropertyGroup>
     <PostBuildEvent>cd "$(ProjectDir)"
 "$(SolutionDir).nuget\NuGet.exe" pack -Verbosity detailed -NonInteractive -Prop Configuration=Release
-"$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323</PostBuildEvent>
+rem "$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323
+
+
+"$(SolutionDir).nuget\NuGet.exe" setApiKey 8338d79e-0b8e-4177-9412-808bc62cbd45         
+"$(SolutionDir).nuget\NuGet.exe" push *.nupkg</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)"
