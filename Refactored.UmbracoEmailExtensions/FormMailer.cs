@@ -2,17 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Web;
 using Refactored.UmbracoEmailExtensions.Interfaces;
 using Refactored.UmbracoEmailExtensions.Models;
 using umbraco.NodeFactory;
 using Umbraco.Web;
+using Umbraco.Core.Models;
 
 namespace Refactored.UmbracoEmailExtensions
 {
     public static class FormMailer
     {
-        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true)
+        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, IPublishedContent[] attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
             if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
@@ -54,6 +56,13 @@ namespace Refactored.UmbracoEmailExtensions
                 }
 
                 Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+
+                if (attachments != null && attachments.Any())
+                {
+                    // Add attachments to the email.
+                }
+
+                Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
                 if (saveMessage)
                     MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
 
@@ -91,7 +100,7 @@ namespace Refactored.UmbracoEmailExtensions
             }
         }
 
-        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true)
+        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true, IPublishedContent[] attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
             if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
@@ -171,7 +180,7 @@ namespace Refactored.UmbracoEmailExtensions
         }
 
         [Obsolete]
-        public static void SendFormData(object form, NameValueCollection formData, bool saveMessage = true)
+        public static void SendFormData(object form, NameValueCollection formData, bool saveMessage = true, IPublishedContent[] attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
             if (details == null)
