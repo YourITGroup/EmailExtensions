@@ -1,23 +1,27 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Web;
 using Refactored.UmbracoEmailExtensions.Interfaces;
 using Refactored.UmbracoEmailExtensions.Models;
 using umbraco.NodeFactory;
-using Umbraco.Web;
-using Umbraco.Core.Models;
+using global::Umbraco.Web;
+using global::Umbraco.Core;
+using global::Umbraco.Core.Models;
+using global::Umbraco.Core.IO;
+using System.Net.Mail;
+using System.Net.Mime;
 
 namespace Refactored.UmbracoEmailExtensions
 {
     public static class FormMailer
     {
-        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, IPublishedContent[] attachments = null)
+        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, IEnumerable<IPublishedContent> attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
-            if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
+            //if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
 
             Dictionary<object, object> contextItems = getCurrentContextItems();
             HttpContext Context = HttpContext.Current;
@@ -35,63 +39,66 @@ namespace Refactored.UmbracoEmailExtensions
                 else
                     Refactored.Email.Email.FieldDelimiters = "[]";
 
-                string subject = string.Empty;
-                string htmlBody = string.Empty;
-                string textBody = string.Empty;
-                if (details.HtmlTemplateId > 0)
+                if (details != null && details.HtmlTemplateId > 0 && details.TextTemplateId > 0)
                 {
-                    htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                        context.RenderTemplate(details.HtmlTemplateId).ToString(),
-                        form, out subject);
-                }
-
-                if (details.TextTemplateId > 0)
-                {
-                    textBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                        context.RenderTemplate(details.TextTemplateId).ToString(),
-                        form);
-
-                    if (string.IsNullOrEmpty(subject))
-                        subject = new Node(details.TextTemplateId).Name;
-                }
-
-                Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
-
-                if (attachments != null && attachments.Any())
-                {
-                    // Add attachments to the email.
-                }
-
-                Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
-                if (saveMessage)
-                    MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
-
-                if (confirm != null)
-                {
-                    if (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0)
+                    string subject = string.Empty;
+                    string htmlBody = string.Empty;
+                    string textBody = string.Empty;
+                    if (details.HtmlTemplateId > 0)
                     {
-                        htmlBody = string.Empty;
-                        textBody = string.Empty;
-                        if (confirm.HtmlConfirmationTemplateId > 0)
-                        {
-                            htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
-                                form, out subject);
-                        }
-
-                        if (confirm.TextConfirmationTemplateId > 0)
-                        {
-                            textBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
-                                form);
-
-                            if (string.IsNullOrEmpty(subject))
-                                subject = new Node(confirm.TextConfirmationTemplateId).Name;
-                        }
-
-                        Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
+                        htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(details.HtmlTemplateId).ToString(),
+                            form, out subject);
                     }
 
+                    if (details.TextTemplateId > 0)
+                    {
+                        textBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(details.TextTemplateId).ToString(),
+                            form);
+
+                        if (string.IsNullOrEmpty(subject))
+                            subject = new Node(details.TextTemplateId).Name;
+                    }
+
+
+                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
+                    AttachFiles(attachments);
+                    Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+                    if (saveMessage)
+                        MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
+                    // Clear any attachments.
+                    Email.Email.Attachments.Clear();
+                }
+
+                if (confirm != null && (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0))
+                {
+                    string htmlBody = string.Empty;
+                    string textBody = string.Empty;
+                    string subject = string.Empty;
+
+                    if (confirm.HtmlConfirmationTemplateId > 0)
+                    {
+                        htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
+                            form, out subject);
+                    }
+
+                    if (confirm.TextConfirmationTemplateId > 0)
+                    {
+                        textBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
+                            form);
+
+                        if (string.IsNullOrEmpty(subject))
+                            subject = new Node(confirm.TextConfirmationTemplateId).Name;
+                    }
+
+                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
+                    AttachFiles(attachments);
+                    Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
+                    // Clear any attachments.
+                    Email.Email.Attachments.Clear();
                 }
             }
             finally
@@ -100,7 +107,7 @@ namespace Refactored.UmbracoEmailExtensions
             }
         }
 
-        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true, IPublishedContent[] attachments = null)
+        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true, IEnumerable<IPublishedContent> attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
             if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
@@ -141,35 +148,42 @@ namespace Refactored.UmbracoEmailExtensions
                         subject = new Node(details.TextTemplateId).Name;
                 }
 
+                // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
+                AttachFiles(attachments);
                 Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+                // Clear any attachments.
+                Email.Email.Attachments.Clear();
+
                 if (saveMessage)
                     MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
 
-                if (confirm != null)
+                if (confirm != null && (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0))
                 {
-                    if (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0)
+                    htmlBody = string.Empty;
+                    textBody = string.Empty;
+                    if (confirm.HtmlConfirmationTemplateId > 0)
                     {
-                        htmlBody = string.Empty;
-                        textBody = string.Empty;
-                        if (confirm.HtmlConfirmationTemplateId > 0)
-                        {
-                            htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
-                                formData, out subject);
-                        }
-
-                        if (confirm.TextConfirmationTemplateId > 0)
-                        {
-                            textBody = Refactored.Email.Email.ParseMessageTemplateContent(
-                                context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
-                                formData);
-
-                            if (string.IsNullOrEmpty(subject))
-                                subject = new Node(confirm.TextConfirmationTemplateId).Name;
-                        }
-
-                        Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
+                        htmlBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.HtmlConfirmationTemplateId).ToString(),
+                            formData, out subject);
                     }
+
+                    if (confirm.TextConfirmationTemplateId > 0)
+                    {
+                        textBody = Refactored.Email.Email.ParseMessageTemplateContent(
+                            context.RenderTemplate(confirm.TextConfirmationTemplateId).ToString(),
+                            formData);
+
+                        if (string.IsNullOrEmpty(subject))
+                            subject = new Node(confirm.TextConfirmationTemplateId).Name;
+                    }
+
+                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
+                    AttachFiles(attachments);
+                    Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
+                    // Clear any attachments.
+                    Email.Email.Attachments.Clear();
+
 
                 }
             }
@@ -179,8 +193,34 @@ namespace Refactored.UmbracoEmailExtensions
             }
         }
 
+        private static void AttachFiles(IEnumerable<IPublishedContent> attachments)
+        {
+            if (attachments != null && attachments.Any())
+            {
+                Func<string, Attachment> attach = (file) =>
+                {
+                    if (string.IsNullOrWhiteSpace(file))
+                        return null;
+
+                    var attachment = new Attachment(file, MediaTypeNames.Application.Octet);
+                    ContentDisposition disposition = attachment.ContentDisposition;
+                    disposition.CreationDate = System.IO.File.GetCreationTime(file);
+                    disposition.ModificationDate = System.IO.File.GetLastWriteTime(file);
+                    disposition.ReadDate = System.IO.File.GetLastAccessTime(file);
+
+                    return attachment;
+
+                };
+                // a.HasValue(fileAlias) - Breaking change between 6.0 and 7.1 somewhere - moved the extensions library from Umbraco.Core to Umbraco.Web.
+                string fileAlias = "umbracoFile"; // TODO: Use Umbraco Constants where available (not in our dependent version of Umbraco).
+                Email.Email.Attachments.AddRange(attachments
+                                                    .Where(a => !string.IsNullOrWhiteSpace(a.GetPropertyValue<string>(fileAlias)))
+                                                    .Select(a => attach(IOHelper.MapPath(a.GetPropertyValue<string>(fileAlias)))));
+            }
+        }
+
         [Obsolete]
-        public static void SendFormData(object form, NameValueCollection formData, bool saveMessage = true, IPublishedContent[] attachments = null)
+        public static void SendFormData(object form, NameValueCollection formData, bool saveMessage = true)
         {
             ISubmitDetails details = form as ISubmitDetails;
             if (details == null)

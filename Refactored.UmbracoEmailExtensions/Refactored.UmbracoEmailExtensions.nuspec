@@ -5,7 +5,7 @@
     <version>$version$</version>
     <title>Refactored.UmbracoEmailExtensions</title>
     <authors>Robert Foster</authors>
-    <owners>R &amp; E Foster &amp; Associates Pty Ltd</owners>
+    <owners>Digitalsmith Pty Ltd</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
       <![CDATA[Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates.
@@ -14,7 +14,7 @@ This package extends UmbracoHelper providing a SendFormData extension method to 
           ]]>
     </description>
     <summary>Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates</summary>
-    <copyright>Copyright 2012-2013 R &amp; E Foster &amp; Associates Pty Ltd</copyright>
+    <copyright>Copyright 2012-2014 Digitalsmith Pty Ltd</copyright>
     <language />
     <releaseNotes>
       <![CDATA[Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates.
@@ -24,7 +24,10 @@ This package extends UmbracoHelper providing a SendFormData extension method to 
 New in Version 2:
 * Message Centre Dashboard allows users to track messages sent and received on the site and provides the ability to reply and archive messages.
 
-2.0.1.0: Added optional parameter to FormMailer.SendFormData methods to turn off recording messages in the database.
+* 2.0.1.0: Added optional parameter to FormMailer.SendFormData methods to turn off recording messages in the database.
+
+* 2.0.6.0: Added the ability to specify a list of IPublishedContent to allow for attachments to be sent with the email.
+
       ]]>
     </releaseNotes>
     <iconUrl>http://apps.refactored.com.au/assets/Refactored_32.png</iconUrl>

@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Refactored.UmbracoEmailExtensions")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("R & E Foster & Associates")]
+[assembly: AssemblyCompany("Digitalsmith Pty Ltd")]
 [assembly: AssemblyProduct("Refactored.UmbracoEmailExtensions")]
-[assembly: AssemblyCopyright("Copyright © R & E Foster & Associates 2011")]
+[assembly: AssemblyCopyright("Copyright © Digitalsmith 2011-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.4.0")]
-[assembly: AssemblyFileVersion("2.0.4.0")]
+[assembly: AssemblyVersion("2.0.6.6")]
+[assembly: AssemblyFileVersion("2.0.6.6")]

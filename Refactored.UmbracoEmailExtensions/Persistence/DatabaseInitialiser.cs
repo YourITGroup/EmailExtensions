@@ -10,9 +10,10 @@ namespace Refactored.UmbracoEmailExtensions.Persistence
 {
     internal static class DatabaseInitialiser
     {
-        internal static void InitialiseEmailDatabase(this Database database) {
-            //if (database.TableExist("mcEmailMessage"))
-            //    return;
+        internal static void InitialiseEmailDatabase(this Database database)
+        {
+            if (database.TableExist("mcEmailMessage"))
+                return;
             // Create table automatically wraps the operation in a Transaction
             database.CreateTable<Message>();
         }

@@ -114,9 +114,9 @@
     <Reference Include="Our.Umbraco.uGoLive.Checks">
       <HintPath>packages\UmbracoCms.Core.6.0.0\lib\Our.Umbraco.uGoLive.Checks.dll</HintPath>
     </Reference>
-    <Reference Include="Refactored.Email, Version=1.3.1.0, Culture=neutral, PublicKeyToken=eca29a3de6791fd9, processorArchitecture=MSIL">
+    <Reference Include="Refactored.Email, Version=1.3.1.5, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>packages\Refactored.Email.1.3.1.0\lib\net35\Refactored.Email.dll</HintPath>
+      <HintPath>packages\Refactored.Email.1.3.1.5\lib\net35\Refactored.Email.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>packages\ServiceStack.Text.3.9.35\lib\net35\ServiceStack.Text.dll</HintPath>
@@ -293,11 +293,13 @@
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
     <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
   </Target>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd "$(ProjectDir)"
 "$(SolutionDir).nuget\NuGet.exe" pack -Verbosity detailed -NonInteractive -Prop Configuration=Release
-"$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323</PostBuildEvent>
+rem "$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323
+
+"$(SolutionDir).nuget\NuGet.exe" setApiKey 8338d79e-0b8e-4177-9412-808bc62cbd45         
+"$(SolutionDir).nuget\NuGet.exe" push *.nupkg</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ProjectExtensions>

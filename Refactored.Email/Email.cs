@@ -40,33 +40,6 @@ namespace Refactored.Email
 
         private static List<Attachment> attachments;
 
-        ///// <summary>
-        ///// Sends an Email with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">To email addresses, separated by ";"</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="subject">Email subject</param>
-        //public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody)
-        //{
-        //    SendEmail(from, to, string.Empty, subject, htmlBody, plainBody);
-        //}
-
-        ///// <summary>
-        ///// Sends an Email with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">To email addresses, separated by ";"</param>
-        ///// <param name="cc">CC email addresses, separated by ";"</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="subject">Email subject</param>
-        //public static void SendEmail(string from, string to, string cc, string subject, string htmlBody, string plainBody)
-        //{
-        //    SendEmail(from, to, cc, string.Empty, subject, htmlBody, plainBody);
-        //}
-
         /// <summary>
         /// Sends an Email with a Html body and an alternate Text body.
         /// </summary>
@@ -120,33 +93,6 @@ namespace Refactored.Email
             smtpClient.Send(message);
         }
 
-        ///// <summary>
-        ///// Sends an Email with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">Collection of Email Addresses to send the email to</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="subject">Email subject</param>
-        //public static void SendEmail(string from, MailAddressCollection to, string subject, string htmlBody, string plainBody)
-        //{
-        //    SendEmail(from, to, null, subject, htmlBody, plainBody);
-        //}
-
-        ///// <summary>
-        ///// Sends an Email with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">Collection of Email Addresses to send the email to</param>
-        ///// <param name="cc">Collection of Email Addresses to copy the email to</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="subject">Email subject</param>
-        //public static void SendEmail(string from, MailAddressCollection to, MailAddressCollection cc, string subject, string htmlBody, string plainBody)
-        //{
-        //    SendEmail(from, to, cc, null, subject, htmlBody, plainBody);
-        //}
-
         /// <summary>
         /// Sends an Email with a Html body and an alternate Text body.
         /// </summary>
@@ -184,94 +130,6 @@ namespace Refactored.Email
                 SendMessage(message);
             }
         }
-
-        ///// <summary>
-        ///// Sends an email Asynchronously with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">To email addresses, separated by ";"</param>
-        ///// <param name="subject">Email subject</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="cc">CC email addresses, separated by ";"</param>
-        ///// <param name="bcc">BCC email addresses, separated by ";"</param>
-        //public static void SendEmailAsync(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "")
-        //{
-        //    if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
-        //    {
-        //        throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
-        //    }
-
-        //    using (MailMessage message = new MailMessage())
-        //    {
-        //        if (!string.IsNullOrEmpty(from))
-        //            message.From = new MailAddress(from);
-
-        //        if (!string.IsNullOrEmpty(to))
-        //            foreach (string email in to.Split(new char[] { ';' }))
-        //                // Set the Bcc address of the mail message
-        //                if (email.Trim() != string.Empty)
-        //                    message.To.Add(new MailAddress(email));
-
-        //        if (!string.IsNullOrEmpty(cc))
-        //            foreach (string email in cc.Split(new char[] { ';' }))
-        //                // Set the Bcc address of the mail message
-        //                if (email.Trim() != string.Empty)
-        //                    message.CC.Add(new MailAddress(email));
-
-        //        if (!string.IsNullOrEmpty(bcc))
-        //            foreach (string email in bcc.Split(new char[] { ';' }))
-        //                // Set the Bcc address of the mail message
-        //                if (email.Trim() != string.Empty)
-        //                    message.Bcc.Add(new MailAddress(email));
-        //        message.Subject = subject;
-        //        message.BodyEncoding = Encoding.UTF8;
-        //        PrepareBody(message, htmlBody, plainBody);
-
-        //        SmtpClient smtpClient = new SmtpClient { EnableSsl = Email.EnableSsl };
-        //        smtpClient.SendAsync(message, null);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Sends an Email asynchronously with a Html body and an alternate Text body.
-        ///// </summary>
-        ///// <param name="from">From email address</param>
-        ///// <param name="to">Collection of Email Addresses to send the email to</param>
-        ///// <param name="subject">Email subject</param>
-        ///// <param name="htmlBody">HTML formatted content</param>
-        ///// <param name="plainBody">Plain text formatted content</param>
-        ///// <param name="cc">Collection of Email Addresses to copy the email to</param>
-        ///// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
-        //public static void SendEmailAsync(string from, MailAddressCollection to, string subject,
-        //    string htmlBody, string plainBody,
-        //    MailAddressCollection cc = null, MailAddressCollection bcc = null)
-        //{
-        //    if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
-        //    {
-        //        throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
-        //    }
-        //    using (MailMessage message = new MailMessage())
-        //    {
-        //        if (!string.IsNullOrEmpty(from))
-        //            message.From = new MailAddress(from);
-
-        //        foreach (MailAddress ma in to)
-        //            message.To.Add(ma);
-        //        if (cc != null)
-        //            foreach (MailAddress ma in cc)
-        //                message.CC.Add(ma);
-        //        if (bcc != null)
-        //            foreach (MailAddress ma in bcc)
-        //                message.Bcc.Add(ma);
-        //        message.Subject = subject;
-        //        message.BodyEncoding = Encoding.UTF8;
-        //        PrepareBody(message, htmlBody, plainBody);
-
-        //        SmtpClient smtpClient = new SmtpClient { EnableSsl = Email.EnableSsl };
-        //        smtpClient.SendAsync(message, null);
-        //    }
-        //}
 
         /// <summary>
         /// Prepares a plain text email view.
@@ -504,13 +362,13 @@ namespace Refactored.Email
                 message.Body = plainBody;
                 message.IsBodyHtml = false;
             }
-            if (Attachments.Count > 0)
-            {
+            //if (Attachments.Count > 0)
+            //{
                 foreach (Attachment a in Attachments)
                 {
                     message.Attachments.Add(a);
                 }
-            }
+            //}
         }
 
         /// <summary>
@@ -627,51 +485,6 @@ namespace Refactored.Email
             return ParseMessageTemplate(templateName, parameters, out subject);
         }
 
-        ///// <summary>
-        ///// Returns the content of the message template with mail merged parameters
-        ///// </summary>
-        ///// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <seealso cref="MailTemplateDirectory"/>
-        ///// <seealso cref="GetMessageTemplate"/>
-        ///// <seealso cref="ParseMessageTemplateContent"/>
-        ///// <returns>Content of the named Template file</returns>
-        //public static string ParseMessageTemplate<T>(string templateName, T parameters)
-        //{
-        //    string subject = string.Empty;
-        //    return ParseMessageTemplate(templateName, parameters.ToDictionary<object>(), out subject);
-        //}
-
-        ///// <summary>
-        ///// Returns the content of the message template with mail merged parameters
-        ///// </summary>
-        ///// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <seealso cref="MailTemplateDirectory"/>
-        ///// <seealso cref="GetMessageTemplate"/>
-        ///// <seealso cref="ParseMessageTemplateContent"/>
-        ///// <returns>Content of the named Template file</returns>
-        //public static string ParseMessageTemplate<T>(string templateName, T parameters, out string subject)
-        //{
-        //    return ParseMessageTemplate(templateName, parameters.ToDictionary<object>(), out subject);
-        //}
-
-        ///// <summary>
-        ///// Returns the content of the message template with mail merged parameters
-        ///// </summary>
-        ///// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        ///// <seealso cref="MailTemplateDirectory"/>
-        ///// <seealso cref="GetMessageTemplate"/>
-        ///// <seealso cref="ParseMessageTemplateContent"/>
-        ///// <returns>Content of the named Template file</returns>
-        //public static string ParseMessageTemplate(string templateName, IOrderedDictionary parameters, out string subject)
-        //{
-        //    string content = File.ReadAllText(GetMessageTemplate(templateName));
-        //    return ParseMessageTemplateContent(content, parameters, out subject);
-        //}
-
         /// <summary>
         /// Returns the content of the message template with mail merged parameters
         /// </summary>
@@ -701,32 +514,6 @@ namespace Refactored.Email
         {
             return ParseMessageTemplate(templateName, parameters, out subject);
         }
-
-        ///// <summary>
-        ///// Returns the content of the message with mail merged parameters
-        ///// </summary>
-        ///// <param name="content">message body to be merged with with mail merge data</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <seealso cref="ParseMessageTemplate"/>
-        ///// <returns>Content that has been parsed and updated</returns>
-        //public static string ParseMessageTemplateContent(string content, IOrderedDictionary parameters)
-        //{
-        //    string subject = string.Empty;
-        //    return ParseMessageTemplateContent(content, parameters, out subject);
-        //}
-
-        ///// <summary>
-        ///// Returns the content of the message with mail merged parameters
-        ///// </summary>
-        ///// <param name="content">message body to be merged with with mail merge data</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        ///// <seealso cref="ParseMessageTemplate"/>
-        ///// <returns>Content that has been parsed and updated</returns>
-        //public static string ParseMessageTemplateContent(string content, IOrderedDictionary parameters, out string subject)
-        //{
-        //    return ParseMessageTemplateContent(content, (IDictionary)parameters, out subject);
-        //}
 
         /// <summary>
         /// Returns the content of the message with mail merged parameters
