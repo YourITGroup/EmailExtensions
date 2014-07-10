@@ -7,6 +7,8 @@ namespace Refactored.UmbracoEmailExtensions.Interfaces
 {
     public interface IConfirmationDetails
     {
+        string FromEmail { get; }
+        string FieldPattern { get; }
         string SubmitterEmail { get; }
         int HtmlConfirmationTemplateId { get; }
         int TextConfirmationTemplateId { get; }

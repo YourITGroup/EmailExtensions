@@ -7,11 +7,11 @@ namespace Refactored.UmbracoEmailExtensions.Interfaces
 {
     public interface ISubmitDetails
     {
-        string ToEmail { get;  }
         string FromEmail { get; }
+        string FieldPattern { get; }
+        string ToEmail { get;  }
         string BccEmail { get; }
         int HtmlTemplateId { get; }
         int TextTemplateId { get; }
-        string FieldPattern { get; }
     }
 }

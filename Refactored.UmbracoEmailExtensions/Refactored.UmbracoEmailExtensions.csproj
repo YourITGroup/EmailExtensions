@@ -114,9 +114,9 @@
     <Reference Include="Our.Umbraco.uGoLive.Checks">
       <HintPath>packages\UmbracoCms.Core.6.0.0\lib\Our.Umbraco.uGoLive.Checks.dll</HintPath>
     </Reference>
-    <Reference Include="Refactored.Email, Version=1.3.1.5, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Refactored.Email, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>packages\Refactored.Email.1.3.1.5\lib\net35\Refactored.Email.dll</HintPath>
+      <HintPath>packages\Refactored.Email.1.3.2.0\lib\net35\Refactored.Email.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>packages\ServiceStack.Text.3.9.35\lib\net35\ServiceStack.Text.dll</HintPath>

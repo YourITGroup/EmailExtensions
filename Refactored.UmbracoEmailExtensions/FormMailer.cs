@@ -18,6 +18,24 @@ namespace Refactored.UmbracoEmailExtensions
 {
     public static class FormMailer
     {
+        internal static object attachmentLock = new object();
+
+        private static bool SendEmail(string fromEmail, string toEmail, string subject, string htmlBody, string textBody, string bccList = null, IEnumerable<IPublishedContent> attachments = null)
+        {
+            if (attachments != null && attachments.Any())
+            {
+                lock (attachmentLock)
+                {
+                    Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bccList, attachments: ProcessFiles(attachments));
+                }
+            }
+            else
+            {
+                Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bccList);
+            }
+            return true;
+        }
+
         public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, IEnumerable<IPublishedContent> attachments = null)
         {
             ISubmitDetails details = form as ISubmitDetails;
@@ -62,13 +80,9 @@ namespace Refactored.UmbracoEmailExtensions
                     }
 
 
-                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
-                    AttachFiles(attachments);
-                    Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+                    SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, details.BccEmail, attachments);
                     if (saveMessage)
                         MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
-                    // Clear any attachments.
-                    Email.Email.Attachments.Clear();
                 }
 
                 if (confirm != null && (confirm.HtmlConfirmationTemplateId > 0 || confirm.TextConfirmationTemplateId > 0))
@@ -94,11 +108,8 @@ namespace Refactored.UmbracoEmailExtensions
                             subject = new Node(confirm.TextConfirmationTemplateId).Name;
                     }
 
-                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
-                    AttachFiles(attachments);
-                    Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
-                    // Clear any attachments.
-                    Email.Email.Attachments.Clear();
+                    SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody, attachments: attachments);
+                    //Refactored.Email.Email.SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
                 }
             }
             finally
@@ -148,11 +159,8 @@ namespace Refactored.UmbracoEmailExtensions
                         subject = new Node(details.TextTemplateId).Name;
                 }
 
-                // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
-                AttachFiles(attachments);
-                Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
-                // Clear any attachments.
-                Email.Email.Attachments.Clear();
+                SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bccList: details.BccEmail, attachments: attachments);
+                //Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
 
                 if (saveMessage)
                     MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
@@ -178,11 +186,8 @@ namespace Refactored.UmbracoEmailExtensions
                             subject = new Node(confirm.TextConfirmationTemplateId).Name;
                     }
 
-                    // TODO: We probably need to lock this for thread safety to avoid cross-contamination of the attachments.
-                    AttachFiles(attachments);
-                    Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
-                    // Clear any attachments.
-                    Email.Email.Attachments.Clear();
+                    SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody, attachments: attachments);
+                    //Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
 
 
                 }
@@ -193,7 +198,7 @@ namespace Refactored.UmbracoEmailExtensions
             }
         }
 
-        private static void AttachFiles(IEnumerable<IPublishedContent> attachments)
+        private static IEnumerable<Attachment> ProcessFiles(IEnumerable<IPublishedContent> attachments)
         {
             if (attachments != null && attachments.Any())
             {
@@ -213,10 +218,12 @@ namespace Refactored.UmbracoEmailExtensions
                 };
                 // a.HasValue(fileAlias) - Breaking change between 6.0 and 7.1 somewhere - moved the extensions library from Umbraco.Core to Umbraco.Web.
                 string fileAlias = "umbracoFile"; // TODO: Use Umbraco Constants where available (not in our dependent version of Umbraco).
-                Email.Email.Attachments.AddRange(attachments
-                                                    .Where(a => !string.IsNullOrWhiteSpace(a.GetPropertyValue<string>(fileAlias)))
-                                                    .Select(a => attach(IOHelper.MapPath(a.GetPropertyValue<string>(fileAlias)))));
+                return attachments.Where(a => 
+                                        a != null // Deleted Items will be null - this is a safeguard.
+                                        && !string.IsNullOrWhiteSpace(a.GetPropertyValue<string>(fileAlias)))
+                                    .Select(a => attach(IOHelper.MapPath(a.GetPropertyValue<string>(fileAlias))));
             }
+            return null;
         }
 
         [Obsolete]
