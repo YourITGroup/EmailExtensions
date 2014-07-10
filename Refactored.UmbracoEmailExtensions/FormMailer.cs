@@ -20,29 +20,29 @@ namespace Refactored.UmbracoEmailExtensions
     {
         internal static object attachmentLock = new object();
 
-        private static bool SendEmail(string fromEmail, string toEmail, string subject, string htmlBody, string textBody, string bccList = null, IEnumerable<IPublishedContent> attachments = null)
+        private static bool SendEmail(string fromEmail, string toEmail, string subject, string htmlBody, string textBody, string bcc = null, string cc = null, IEnumerable<IPublishedContent> attachments = null)
         {
             if (attachments != null && attachments.Any())
             {
                 lock (attachmentLock)
                 {
-                    Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bccList, attachments: ProcessFiles(attachments));
+                    Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bcc, cc: cc, attachments: ProcessFiles(attachments));
                 }
             }
             else
             {
-                Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bccList);
+                Refactored.Email.Email.SendEmail(fromEmail, toEmail, subject, htmlBody, textBody, bcc: bcc, cc: cc);
             }
             return true;
         }
 
-        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, IEnumerable<IPublishedContent> attachments = null)
+        public static void SendFormData(this UmbracoHelper context, object form, bool saveMessage = true, bool showCcList = false, IEnumerable<IPublishedContent> attachments = null)
         {
-            ISubmitDetails details = form as ISubmitDetails;
-            //if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
 
             Dictionary<object, object> contextItems = getCurrentContextItems();
             HttpContext Context = HttpContext.Current;
+
+            ISubmitDetails details = form as ISubmitDetails;
             IConfirmationDetails confirm = form as IConfirmationDetails;
 
             try
@@ -80,7 +80,11 @@ namespace Refactored.UmbracoEmailExtensions
                     }
 
 
-                    SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, details.BccEmail, attachments);
+                    SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, 
+                        bcc: showCcList ? null : details.BccEmail,
+                        cc: showCcList ? details.BccEmail : null, 
+                        attachments: attachments);
+
                     if (saveMessage)
                         MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
                 }
@@ -109,7 +113,6 @@ namespace Refactored.UmbracoEmailExtensions
                     }
 
                     SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody, attachments: attachments);
-                    //Refactored.Email.Email.SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
                 }
             }
             finally
@@ -118,13 +121,12 @@ namespace Refactored.UmbracoEmailExtensions
             }
         }
 
-        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true, IEnumerable<IPublishedContent> attachments = null)
+        public static void SendFormData(this UmbracoHelper context, object form, NameValueCollection formData, bool saveMessage = true, bool showCcList = false, IEnumerable<IPublishedContent> attachments = null)
         {
-            ISubmitDetails details = form as ISubmitDetails;
-            if (details == null) throw new ArgumentException("form must implement ISubmitDetails", "form");
-
             Dictionary<object, object> contextItems = getCurrentContextItems();
             HttpContext Context = HttpContext.Current;
+
+            ISubmitDetails details = form as ISubmitDetails;
             IConfirmationDetails confirm = form as IConfirmationDetails;
 
             try
@@ -159,8 +161,10 @@ namespace Refactored.UmbracoEmailExtensions
                         subject = new Node(details.TextTemplateId).Name;
                 }
 
-                SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bccList: details.BccEmail, attachments: attachments);
-                //Refactored.Email.Email.SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody, bcc: details.BccEmail);
+                SendEmail(details.FromEmail, details.ToEmail, subject, htmlBody, textBody,
+                        bcc: showCcList ? null : details.BccEmail,
+                        cc: showCcList ? details.BccEmail : null, 
+                        attachments: attachments);
 
                 if (saveMessage)
                     MessageManager.CreateMessage(confirm == null ? details.FromEmail : confirm.SubmitterEmail, details.ToEmail, subject, htmlBody, textBody);
@@ -187,9 +191,6 @@ namespace Refactored.UmbracoEmailExtensions
                     }
 
                     SendEmail(confirm.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody, attachments: attachments);
-                    //Refactored.Email.Email.SendEmail(details.FromEmail, confirm.SubmitterEmail, subject, htmlBody, textBody);
-
-
                 }
             }
             finally
