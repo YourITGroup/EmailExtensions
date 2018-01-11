@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refactored.Email", "Refactored.Email.csproj", "{01A38124-22A2-44C1-A636-FEBEA86FECB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refactored.Email.Examples", "..\Refactored.Email.Examples\Refactored.Email.Examples.csproj", "{A1150CD0-349F-4FAF-BECE-428AE7528818}"
@@ -45,5 +47,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {270C83DA-489A-43C0-A134-DFF03CC20941}
 	EndGlobalSection
 EndGlobal

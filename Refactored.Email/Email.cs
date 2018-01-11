@@ -1,12 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,7 +16,7 @@ using System.Web;
 
 
 /*
- * Copyright 2006-2011 R & E Foster & Associates P/L
+ * Copyright 2006-2018 R & E Foster & Associates P/L
  * 
  * Contact: http://refoster.com.au/
  * Email:   mailto:info@refoster.com.au
@@ -25,21 +27,92 @@ using System.Web;
 
 namespace Refactored.Email
 {
-
     /// <summary>
     /// SMTP Email Functionality includes Mail Merge and HTML/Plain text alternate views.
     /// </summary>
     /// <remarks>
-    ///  <para>Copyright 2006-2011 R &amp; E Foster &amp; Associates P/L </para>
-    ///  <para>Documentation &amp; Download: <a href="http://refoster.com.au/">http://refoster.com.au/</a> </para>
-    ///  <para>Email:  <a href="mailto:info@refoster.com.au">info@refoster.com.au</a> </para>
+    ///  <para>Copyright 2006-2013 R &amp; E Foster &amp; Associates P/L, 2013 - 2014 Digitalsmith Pty Ltd </para>
+    ///  <para>Documentation &amp; Download: <a href="http://digitalsmith.com.au/">http://digitalsmith.com.au/</a> </para>
+    ///  <para>Email:  <a href="mailto:info@digitalsmith.com.au">info@digitalsmith.com.au</a> </para>
     /// </remarks>
     public static class Email
     {
-        private static string fieldPattern = "{{0}}";
-        private static string fieldDelimiters = "{}";
+        private static string _fieldDelimiters = "{}";
+        private static string _baseUrl;
 
-        //private static List<Attachment> attachments;
+        /// <summary>Enable Linking to Images instead of embedding them</summary>
+        /// <remarks>Any image that has a full url will be linked to instead of embedded in the HTML email.
+        /// Images with a relative url will can be linked as well if WebBaseUrl is set.
+        /// </remarks>
+        /// <seealso cref="P:Refactored.Email.Email.WebBaseUrl" />
+        public static bool LinkWebImages { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the field pattern for mail merge templates.
+        /// </summary>
+        /// <remarks>The default FieldPattern is {{0}}.  Suggested alternatives are &lt;%{0}%&gt; or [{0}].  Note that the field pattern must contain {0}.</remarks>
+        public static string FieldPattern { get; set; } = "{{0}}";
+
+        /// <summary>
+        /// Gets or Sets basic field delimiters used when creating email templates.
+        /// </summary>
+        /// <remarks>
+        ///  Specify the Field delimiters used when creating email templates.  This sets the Field Pattern up based on the following rules:
+        ///      If a single delimiter character is specified, it will be assumed to have been placed at the start and end of the field.
+        ///      Otherwise, two delimiter characters will be split so that the first is at the start and the second is at the end.
+        /// </remarks>
+        public static string FieldDelimiters
+        {
+            get => _fieldDelimiters;
+            set
+            {
+                if (string.IsNullOrEmpty(value) || value.Trim() == "")
+                {
+                    return;
+                }
+
+                _fieldDelimiters = value;
+                if (_fieldDelimiters.Length == 1)
+                {
+                    FieldPattern = $"{value}{{0}}{value}";
+                }
+                else
+                {
+                    FieldPattern = $"{value[0]}{{0}}{value[1]}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enables or Disables the SSL protocol.  Disabled by default.
+        /// </summary>
+        public static bool EnableSsl { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the base filesystem directory containing mailmerge templates
+        /// </summary>
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        public static string MailTemplateDirectory { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the Http/Https base Url for relative links found in the content templates
+        /// </summary>
+        /// <seealso cref="P:Refactored.Email.Email.LinkWebImages" />
+        public static string WebBaseUrl
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_baseUrl))
+                {
+                    HttpContext current = HttpContext.Current;
+                    if (current != null)
+                        _baseUrl = current.Request.Url.GetLeftPart(UriPartial.Authority);
+                }
+
+                return _baseUrl;
+            }
+            set => _baseUrl = value;
+        }
 
         /// <summary>
         /// Sends an Email with a Html body and an alternate Text body.
@@ -51,57 +124,18 @@ namespace Refactored.Email
         /// <param name="plainBody">Plain text formatted content</param>
         /// <param name="cc">CC email addresses, separated by ";"</param>
         /// <param name="bcc">BCC email addresses, separated by ";"</param>
-        /// <param name="attachments">List of <c ref="System.Net.Mail.Attachment">Attachments</c></param>
-        public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "",
-            IEnumerable<Attachment> attachments = null)
+        public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "", IEnumerable<Attachment> attachments = null)
         {
             if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
             {
                 throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
             }
-            
-            using (MailMessage message = new MailMessage())
+
+            using (MailMessage message = new MailMessage().AddMessageAddresses(from, to, cc, bcc))
             {
-                if (!string.IsNullOrEmpty(from))
-                    message.From = new MailAddress(from);
-
-                if (!string.IsNullOrEmpty(to))
-                    foreach (string email in to.Split(';'))
-                        // Set the Bcc address of the mail message
-                        if (email.Trim() != string.Empty)
-                            message.To.Add(new MailAddress(email));
-
-                if (!string.IsNullOrEmpty(cc))
-                    foreach (string email in cc.Split(';'))
-                        // Set the Bcc address of the mail message
-                        if (email.Trim() != string.Empty)
-                            message.CC.Add(new MailAddress(email));
-
-                if (!string.IsNullOrEmpty(bcc))
-                    foreach (string email in bcc.Split(';'))
-                        // Set the Bcc address of the mail message
-                        if (email.Trim() != string.Empty)
-                            message.Bcc.Add(new MailAddress(email));
                 message.Subject = subject;
-                message.BodyEncoding = Encoding.UTF8;
-                PrepareBody(message, htmlBody, plainBody);
-
-                if (attachments != null && attachments.Any())
-                {
-                    foreach (Attachment a in attachments)
-                    {
-                        message.Attachments.Add(a);
-                    }
-                }
-
-                SendMessage(message);
+                SendMessage(message.PrepareMessage(htmlBody, plainBody, attachments));
             }
-        }
-
-        private static void SendMessage(MailMessage message)
-        {
-            SmtpClient smtpClient = new SmtpClient { EnableSsl = Email.EnableSsl };
-            smtpClient.Send(message);
         }
 
         /// <summary>
@@ -114,51 +148,35 @@ namespace Refactored.Email
         /// <param name="plainBody">Plain text formatted content</param>
         /// <param name="cc">Collection of Email Addresses to copy the email to</param>
         /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
-        /// <param name="attachments">List of <c ref="System.Net.Mail.Attachment">Attachments</c></param>
-        public static void SendEmail(string from, MailAddressCollection to, string subject, 
-            string htmlBody, string plainBody, 
-            MailAddressCollection cc = null, MailAddressCollection bcc = null, 
-            IEnumerable<Attachment> attachments = null)
+        /// <param name="attachments">Collection of attachments to add to the message</param>
+        public static void SendEmail(string from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null)
+        {
+            SendEmail(new MailAddress(from), to, subject, htmlBody, plainBody, cc, bcc, attachments);
+        }
+
+        /// <summary>
+        /// Sends an Email with a Html body and an alternate Text body.
+        /// </summary>
+        /// <param name="from">From email address</param>
+        /// <param name="to">Collection of Email Addresses to send the email to</param>
+        /// <param name="subject">Email subject</param>
+        /// <param name="htmlBody">HTML formatted content</param>
+        /// <param name="plainBody">Plain text formatted content</param>
+        /// <param name="cc">Collection of Email Addresses to copy the email to</param>
+        /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
+        /// <param name="attachments">Collection of attachments to add to the message</param>
+        public static void SendEmail(MailAddress from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null)
         {
             if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
             {
                 throw new ArgumentException("Please specify a valid message for either htmlBody or plainBody.");
             }
-            using (MailMessage message = new MailMessage())
+
+            using (MailMessage message = new MailMessage().AddMessageAddresses(from, to, cc, bcc))
             {
-                if (!string.IsNullOrEmpty(from))
-                    message.From = new MailAddress(from);
-
-                foreach (MailAddress ma in to)
-                    message.To.Add(ma);
-                if (cc != null)
-                    foreach (MailAddress ma in cc)
-                        message.CC.Add(ma);
-                if (bcc != null)
-                    foreach (MailAddress ma in bcc)
-                        message.Bcc.Add(ma);
                 message.Subject = subject;
-                message.BodyEncoding = Encoding.UTF8;
-                PrepareBody(message, htmlBody, plainBody);
-                if (attachments != null && attachments.Any())
-                {
-                    foreach (Attachment a in attachments)
-                    {
-                        message.Attachments.Add(a);
-                    }
-                }
-                SendMessage(message);
+                SendMessage(message.PrepareMessage(htmlBody, plainBody, attachments));
             }
-        }
-
-        /// <summary>
-        /// Prepares a plain text email view.
-        /// </summary>
-        /// <param name="content">Plain Text content</param>
-        /// <returns>AlternateView object containing plain text content</returns>
-        public static AlternateView PrepareAlternateView(string content)
-        {
-            return PrepareAlternateView(content, "text/plain");
         }
 
         /// <summary>
@@ -167,228 +185,35 @@ namespace Refactored.Email
         /// <param name="content">Content to be prepared</param>
         /// <param name="contentType">content type for the email content - either text/html or text/plain</param>
         /// <returns>AlternateView object containing the content provided along with it's content type.</returns>
-        public static AlternateView PrepareAlternateView(string content, string contentType)
+        public static AlternateView PrepareAlternateView(string content, string contentType = "text/plain")
         {
             if (string.IsNullOrEmpty(content))
                 return null;
 
-            AlternateView view = null;
-
+            AlternateView alternateViewFromString;
             if (string.IsNullOrEmpty(contentType))
-                view = AlternateView.CreateAlternateViewFromString(content);
-            else
             {
-                if (contentType.Contains("html"))
-                {
-                    List<LinkedResource> resources = new List<LinkedResource>();
-
-                    // If the content contains references to files, then retrieve the files and attach them as LinkedContent.
-                    content = content.ExtractFiles(resources).ExpandUrls().SanitiseHtml();
-
-                    view = AlternateView.CreateAlternateViewFromString(content, Encoding.UTF8, contentType);
-                    view.BaseUri = new Uri(WebBaseUrl);
-
-                    if (resources.Count > 0)
-                        foreach (LinkedResource r in resources)
-                        {
-                            view.LinkedResources.Add(r);
-                        }
-
-                }
-                else
-                {
-                    view = AlternateView.CreateAlternateViewFromString(content,
-                                Encoding.UTF8, contentType);
-                }
+                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content);
             }
-
-            return view;
-        }
-
-        /// <summary>
-        /// Removes any script tags.
-        /// </summary>
-        /// <remarks><para>this method still has to be fully implemented.</para></remarks>
-        /// <param name="content">content to be sanitised</param>
-        /// <returns>sanitised content</returns>
-        private static string SanitiseHtml(this string content)
-        {
-            //Regex reg = new Regex(@"^(<script>)(.*?\.)</script>$", RegexOptions.Multiline);
-            //MatchCollection mc = reg.Matches(content);
-            //foreach (Match m in mc)
-            //{
-            //    // TODO: Finish this by replacing matches.
-            //}
-
-            return content;
-        }
-
-        /// <summary>
-        /// Replaces the url with a standard full url.
-        /// </summary>
-        /// <remarks>
-        /// <para>Added the checks for /http* to take into account invalid urls formatted by TinyMCE adding '/' to the start.</para>
-        /// </remarks>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private static string ReplaceUrl(string url)
-        {
-            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                return url;
-            else
+            else if (contentType == "text/html")
             {
-                if (url.StartsWith("~/"))
-                    url = url.Replace("~/", WebBaseUrl + "/");
-                else if (url.StartsWith("/http:"))
-                    url = url.Substring(1);
-                else if (url.StartsWith("/https:"))
-                    url = url.Substring(1);
-                else if (url.StartsWith("/"))
-                    url = WebBaseUrl + url;
-                else
-                    url = String.Format("{0}/{1}", WebBaseUrl, url);
-            }
-
-            return url;
-
-        }
-        /// <summary>
-        /// Expands out local urls (those not containing any server/scheme parts) to full urls.
-        /// </summary>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        private static string ExpandUrls(this string content)
-        {
-            // We need to get the full href line so that we can compare in case of duplicate urls in the content.
-            // If the url is in the content more than once and is modified, we would end up with multiple modifications on the urls
-            //Regex reg = new Regex(@"(?<=href=(?<quote>""|'))(?<url>[^""|']+)(?=\k<quote>)");
-            Regex reg = new Regex(@"(?<fullHref>(href=(?<quote>""|'))(?<url>[^""|']+)(\k<quote>))");
-            MatchCollection mc = reg.Matches(content);
-            foreach (Match m in mc)
-            {
-                string url = m.Groups["url"].Value;
-                string fullHref = m.Groups["fullHref"].Value;
-                string newUrl = ReplaceUrl(url);
-                string newHref = fullHref.Replace(url, newUrl);
-
-                // The content may not contain the url any longer if the same url is used more than once, so just skip it.
-                if (!content.Contains(fullHref) || url == newUrl)
-                    continue;
-
-                content = Regex.Replace(content, Regex.Escape(fullHref), newHref, RegexOptions.IgnoreCase);
-                
-                // Debugging
-                //content += "<br />{Old Url: " + url + "; New Url: " + newUrl + "}";
-            }
-            return content;
-        }
-
-        /// <summary>
-        /// Parses the html body for attachments.  Valid attachments are images embedded in html with src or background attributes
-        /// </summary>
-        /// <param name="content"></param>
-        /// <param name="resources"></param>
-        /// <returns></returns>
-        private static string ExtractFiles(this string content, List<LinkedResource> resources)
-        {
-            var context = HttpContext.Current;
-
-            Action<string, string> replaceUrl = (imgType, url) =>
-            {
-                if (!string.IsNullOrEmpty(url))
+                List<LinkedResource> resources = new List<LinkedResource>();
+                content = content.ExtractFiles(resources).ExpandUrls().SanitiseHtml();
+                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
+                alternateViewFromString.ContentType.CharSet = Encoding.UTF8.WebName;
+                alternateViewFromString.BaseUri = new Uri(Refactored.Email.Email.WebBaseUrl);
+                if (resources.Count > 0)
                 {
-                    LinkedResource r = null;
-
-                    // Make sure the ContentType is going to be correct.
-                    if (imgType == "jpg")
-                        imgType = "jpeg";
-
-                    string newUrl = ReplaceUrl(url);
-
-                    if (newUrl.StartsWith("http://") || newUrl.StartsWith("https://"))
-                    {
-                        if (!LinkWebImages)
-                        {
-                            WebRequest request = HttpWebRequest.Create(newUrl);
-                            Stream srcStream = request.GetResponse().GetResponseStream();
-                            r = new LinkedResource(srcStream, string.Format("image/{0}", imgType));
-                        }
-                    }
-                    else if (context != null) // TODO: Rethink this - at the moment, it will never be executed.
-                    {
-                        // Assume url is relative to current script execution path.
-                        newUrl = context.Server.MapPath(newUrl);
-
-                        r = new LinkedResource(newUrl, string.Format("image/{0}", imgType));
-                    }
-
-                    if (r != null)
-                    {
-                        string cid = Guid.NewGuid().ToString("N");
-                        r.ContentId = cid;
-                        resources.Add(r);
-
-                        // we need to update the body text by replacing the url with the cid.
-                        content = Regex.Replace(content, Regex.Escape(url), string.Format("cid:{0}", cid), RegexOptions.IgnoreCase);  //content.Replace(url, string.Format("cid:{0}", cid));
-                    }
-                    else
-                    {
-                        content = Regex.Replace(content, Regex.Escape(url), newUrl, RegexOptions.IgnoreCase);  //content.Replace(url, modUrl);
-                    }
-
+                    foreach (LinkedResource linkedResource in resources)
+                        alternateViewFromString.LinkedResources.Add(linkedResource);
                 }
-            };
-
-            //string strRegex = @"(src|background)=(?<quote>""|')(.*?\.)(jpg|jpeg|gif|png|bmp)\k<quote>";
-            string strRegex = @"(?<fullSrc>((src|background)=(?<quote>""|'))(?<url>([^""|']+)(?<imgType>jpg|jpeg|gif|png|bmp)([^""|']*))(\k<quote>))";
-            Regex reg = new Regex(strRegex, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
-
-            MatchCollection mc = reg.Matches(content);
-
-            foreach (Match m in mc)
-            {
-                string imgType = m.Groups["imgType"].Value;
-                string url = m.Groups["url"].Value;
-                string fullSrc = m.Groups["fullSrc"].Value;
-
-                // The content may not contain the url any longer if the same image is used more than once, so just skip it.
-                if (!content.Contains(fullSrc))
-                    continue;
-
-                replaceUrl(imgType, url);
-                
-            }
-
-            return content;
-        }
-
-        private static void PrepareBody(MailMessage message, string htmlBody, string plainBody)
-        {
-            if (!string.IsNullOrEmpty(htmlBody))
-            {
-                if (!string.IsNullOrEmpty(plainBody))
-                {
-                    AlternateView textView = PrepareAlternateView(plainBody);
-                    message.AlternateViews.Add(textView);
-
-                }
-                AlternateView htmlView = PrepareAlternateView(htmlBody, "text/html");
-
-                message.AlternateViews.Add(htmlView);
-
             }
             else
             {
-                message.Body = plainBody;
-                message.IsBodyHtml = false;
+                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
             }
-            //if (Attachments.Count > 0)
-            //{
-                //foreach (Attachment a in Attachments)
-                //{
-                //    message.Attachments.Add(a);
-                //}
-            //}
+
+            return alternateViewFromString;
         }
 
         /// <summary>
@@ -398,18 +223,17 @@ namespace Refactored.Email
         /// <returns></returns>
         public static string ValidateEmailAddress(string email)
         {
-            string msg = string.Empty;
+            string str = string.Empty;
             try
             {
-                // All we're doing here is trying to create an email address from the string.  If it is succesful, then we're ok.
-                new MailAddress(email);
+                MailAddress mailAddress = new MailAddress(email);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                msg = e.Message;
+                str = ex.Message;
             }
 
-            return msg;
+            return str;
         }
 
         /// <summary>
@@ -425,110 +249,112 @@ namespace Refactored.Email
         /// </code>
         /// </remarks>
         /// <param name="templateName"></param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns></returns>
         public static string GetMessageTemplate(string templateName)
         {
-            string messageDir = Email.MailTemplateDirectory;
-            HttpContext context = HttpContext.Current;
-            messageDir = context.Server.MapPath(messageDir);
+            string templateDirectory = HttpContext.Current.Server.MapPath(MailTemplateDirectory);
             string template = ConfigurationManager.AppSettings[templateName];
             if (string.IsNullOrEmpty(template))
+            {
                 template = templateName;
+            }
 
-            if (messageDir[messageDir.Length - 1] != Path.DirectorySeparatorChar && template[0] != Path.DirectorySeparatorChar)
-                return string.Format("{0}{1}{2}", messageDir, Path.DirectorySeparatorChar, template);
-            else
-                return string.Format("{0}{1}", messageDir, template);
+            if (!templateDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()) && 
+                !template.StartsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                return $"{templateDirectory}{Path.DirectorySeparatorChar}{template}";
+            }
+
+            return $"{templateDirectory}{template}";
+        }
+
+        private static string ExtractSubject(string content)
+        {
+            string subject = string.Empty;
+            Match match = new Regex("<title>(?<pageTitle>.*)</title>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline).Match(content);
+            if (match.Groups.Count > 1)
+            {
+                subject = match.Groups["pageTitle"].Value.Trim().Replace(Environment.NewLine, " ").Replace("  ", " ");
+                try
+                {
+                    subject = HttpContext.Current.Server.HtmlDecode(subject);
+                }
+                catch
+                {
+                }
+            }
+            return subject;
         }
 
         /// <summary>
         /// Generic method to return the content of the message with mail merged parameters
         /// </summary>
-        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
+        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" /> for more information</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="GetMessageTemplate"/>
-        /// <seealso cref="ParseMessageTemplateContent"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplate<T>(string templateName, T parameters)
         {
             string subject = string.Empty;
-
             return ParseMessageTemplate(templateName, parameters, out subject);
         }
 
         /// <summary>
         /// Generic method to return the content of the message with mail merged parameters
         /// </summary>
-        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
+        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" /> for more information</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="GetMessageTemplate"/>
-        /// <seealso cref="ParseMessageTemplateContent"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplate<T>(string templateName, T parameters, out string subject)
         {
-            string content = File.ReadAllText(GetMessageTemplate(templateName));
-            return ParseMessageTemplateContent(content, parameters, out subject);
+            return ParseMessageTemplateContent(File.ReadAllText(GetMessageTemplate(templateName)), parameters, out subject);
         }
-
-        ///// <summary>
-        ///// Returns the content of the message template with mail merged parameters
-        ///// </summary>
-        ///// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
-        ///// <param name="parameters">Collection of field values containing mail merge data</param>
-        ///// <seealso cref="MailTemplateDirectory"/>
-        ///// <seealso cref="GetMessageTemplate"/>
-        ///// <seealso cref="ParseMessageTemplateContent"/>
-        ///// <returns>Content of the named Template file</returns>
-        //public static string ParseMessageTemplate(string templateName, IOrderedDictionary parameters)
-        //{
-        //    string subject = string.Empty;
-        //    return ParseMessageTemplate(templateName, parameters, out subject);
-        //}
 
         /// <summary>
         /// Returns the content of the message with mail merged parameters
         /// </summary>
-        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
+        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" /> for more information</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="GetMessageTemplate"/>
-        /// <seealso cref="ParseMessageTemplateContent"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplate(string templateName, IDictionary<string, object> parameters)
         {
-            string subject = string.Empty;
-            return ParseMessageTemplate(templateName, parameters, out subject);
+            return ParseMessageTemplate(templateName, parameters, out string subject);
         }
 
         /// <summary>
         /// Returns the content of the message template with mail merged parameters
         /// </summary>
-        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
+        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" /> for more information</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="GetMessageTemplate"/>
-        /// <seealso cref="ParseMessageTemplateContent"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content of the named Template file</returns>
         public static string ParseMessageTemplate(string templateName, NameValueCollection parameters)
         {
-            string subject = string.Empty;
-            return ParseMessageTemplate(templateName, parameters, out subject);
+            return ParseMessageTemplate(templateName, parameters, out string subject);
         }
 
         /// <summary>
         /// Returns the content of the message template with mail merged parameters
         /// </summary>
-        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="GetMessageTemplate"/> for more information</param>
+        /// <param name="templateName">Name of the template registered in appSettings configuration - refer to <see cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" /> for more information</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        /// <seealso cref="MailTemplateDirectory"/>
-        /// <seealso cref="GetMessageTemplate"/>
-        /// <seealso cref="ParseMessageTemplateContent"/>
+        /// <seealso cref="P:Refactored.Email.Email.MailTemplateDirectory" />
+        /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content of the named Template file</returns>
         public static string ParseMessageTemplate(string templateName, NameValueCollection parameters, out string subject)
         {
@@ -540,12 +366,11 @@ namespace Refactored.Email
         /// </summary>
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent(string content, IDictionary<string, object> parameters)
         {
-            string subject = string.Empty;
-            return ParseMessageTemplateContent(content, parameters, out subject);
+            return ParseMessageTemplateContent(content, parameters, out string subject);
         }
 
         /// <summary>
@@ -554,14 +379,53 @@ namespace Refactored.Email
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent(string content, IDictionary<string, object> parameters, out string subject)
         {
-            NameValueCollection p = new NameValueCollection(parameters.Count);
-            foreach (var key in parameters.Keys)
-                p.Add(key, parameters[key].ToString());
-            return ParseMessageTemplateContent(content, p, out subject);
+            // Basic check for the existence of HTML content by checking for a <title> tag
+            bool isHtml = !string.IsNullOrEmpty(ExtractSubject(content));
+
+            foreach (string key in parameters.Keys)
+            {
+                object param = parameters[key];
+                // If the parameter is an Enumerable then we can iterate through each item in it and build a list.
+                if (!(param is string) && IsEnumerable(param.GetType()))
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    foreach (object item in (IEnumerable)param)
+                    {
+                        if (isHtml)
+                            stringBuilder.AppendFormat("<li>{0}</li>", item);
+                        else
+                            stringBuilder.AppendFormat("{0}{1}", item, Environment.NewLine);
+                    }
+
+                    // Replace the original param with the build list for further processing.
+                    param = !isHtml ? stringBuilder.ToString() : $"<ul>{stringBuilder}</ul>";
+                }
+                content = content.Replace(string.Format(FieldPattern, key), param.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
+            }
+            subject = ExtractSubject(content);
+
+            return content;
+        }
+
+        /// <summary>
+        /// Helper function to determine whether an object is an Enumerable or not.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static bool IsEnumerable(Type type)
+        {
+            foreach (Type type1 in type.GetInterfaces())
+            {
+                if (type1.IsGenericType && type1.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -569,12 +433,11 @@ namespace Refactored.Email
         /// </summary>
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent<T>(string content, T parameters)
         {
-            string subject = string.Empty;
-            return ParseMessageTemplateContent(content, parameters, out subject);
+            return ParseMessageTemplateContent(content, parameters, out string subject);
         }
 
         /// <summary>
@@ -583,16 +446,21 @@ namespace Refactored.Email
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent<T>(string content, T parameters, out string subject)
         {
-            if (parameters is NameValueCollection)
-                return ParseMessageTemplateContent(content, parameters as NameValueCollection, out subject);
-            else if (parameters is IDictionary)
-                return ParseMessageTemplateContent(content, (IDictionary)parameters, out subject);
+            if ((object)parameters is NameValueCollection)
+            {
+                return ParseMessageTemplateContent(content, (object)parameters as NameValueCollection, out subject);
+            }
 
-            return ParseMessageTemplateContent(content, parameters.ToDictionary<object>(), out subject);
+            if (parameters is IDictionary)
+            {
+                return ParseMessageTemplateContent(content, (IDictionary)(object)parameters, out subject);
+            }
+
+            return ParseMessageTemplateContent(content, ((object)parameters).ToDictionary<object>(), out subject);
         }
 
         /// <summary>
@@ -600,12 +468,11 @@ namespace Refactored.Email
         /// </summary>
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent(string content, NameValueCollection parameters)
         {
-            string subject = string.Empty;
-            return ParseMessageTemplateContent(content, parameters, out subject);
+            return ParseMessageTemplateContent(content, parameters, out string subject);
         }
 
         /// <summary>
@@ -614,125 +481,258 @@ namespace Refactored.Email
         /// <param name="content">message body to be merged with with mail merge data</param>
         /// <param name="parameters">Collection of field values containing mail merge data</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
-        /// <seealso cref="ParseMessageTemplate"/>
+        /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
         public static string ParseMessageTemplateContent(string content, NameValueCollection parameters, out string subject)
         {
             foreach (string key in parameters.Keys)
             {
-                // Handle both upper and lower case keys
-                content = content.Replace(string.Format(FieldPattern, key), parameters[key] ?? "", StringComparison.OrdinalIgnoreCase);// Regex.Replace(content, Regex.Escape(string.Format(FieldPattern, key)), parameters[key] ?? "", RegexOptions.IgnoreCase);
+                content = content.Replace(string.Format(FieldPattern, key), parameters[key] ?? "", StringComparison.OrdinalIgnoreCase);
             }
 
-            // Try and work out the subject from the Title if this is an html email.
-            Regex reg = new Regex(@"<title>(?<pageTitle>.*)</title>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline);
-            Match m = reg.Match(content);
-            if (m.Groups.Count > 1)
-            {
-                subject = m.Groups["pageTitle"].Value.Trim().Replace(Environment.NewLine, " ").Replace("  ", " ");
-                try
-                {
-                    subject = HttpContext.Current.Server.HtmlDecode(subject);
-                }
-                catch { }
-            }
-            else
-                subject = string.Empty;
-
-            
+            subject = ExtractSubject(content);
             return content;
         }
 
         /// <summary>
-        /// Gets or Sets the base filesystem directory containing mailmerge templates
+        /// Extension method - Adds the specified addresses to the message and returns the modified message
         /// </summary>
-        /// <seealso cref="GetMessageTemplate"/>
-        public static string MailTemplateDirectory { get; set; }
+        /// <param name="message"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="cc"></param>
+        /// <param name="bcc"></param>
+        /// <returns></returns>
+        public static MailMessage AddMessageAddresses(this MailMessage message, string from, string to, string cc = null, string bcc = null)
+        {
+            message.From = FormatAddress(from);
+            message.CC.AddAddresses(cc);
+            message.Bcc.AddAddresses(bcc);
+            message.To.AddAddresses(to);
+
+            return message;
+        }
 
         /// <summary>
-        /// Gets or Sets the Http/Https base Url for relative links found in the content templates
+        /// Extension method - Adds the specified addresses to the message and returns the modified message
         /// </summary>
-        /// <seealso cref="LinkWebImages"/>
-        public static string WebBaseUrl
+        /// <param name="message"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="cc"></param>
+        /// <param name="bcc"></param>
+        /// <returns></returns>
+        public static MailMessage AddMessageAddresses(this MailMessage message, MailAddress from, MailAddressCollection to, MailAddressCollection cc = null, MailAddressCollection bcc = null)
         {
-            get
+            message.From = FormatAddress(from);
+            message.CC.AddAddresses(cc);
+            message.Bcc.AddAddresses(bcc);
+            message.To.AddAddresses(to);
+
+            return message;
+        }
+
+        /// <summary>
+        /// Extension method - prepares the html and plain message body, adding attachments from within the html body as required and returns the updated message.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="htmlBody"></param>
+        /// <param name="plainBody"></param>
+        /// <param name="attachments"></param>
+        /// <returns></returns>
+        public static MailMessage PrepareMessage(this MailMessage message, string htmlBody, string plainBody, IEnumerable<Attachment> attachments = null)
+        {
+            if (!string.IsNullOrEmpty(htmlBody))
             {
-                if (string.IsNullOrEmpty(_baseUrl))
+                if (!string.IsNullOrEmpty(plainBody))
                 {
-                    var context = HttpContext.Current;
-                    if (context != null)
-                        _baseUrl = context.Request.Url.GetLeftPart(UriPartial.Authority);
+                    AlternateView alternateView = PrepareAlternateView(plainBody, "text/plain");
+                    message.AlternateViews.Add(alternateView);
                 }
-                return _baseUrl;
+
+                AlternateView alternateView1 = PrepareAlternateView(htmlBody, "text/html");
+                message.AlternateViews.Add(alternateView1);
             }
-            set
+            else
             {
-                _baseUrl = value;
+                message.Body = plainBody;
+                message.IsBodyHtml = false;
             }
+            if (attachments != null && attachments.Any())
+            {
+                foreach (Attachment attachment in attachments)
+                    message.Attachments.Add(attachment);
+            }
+            return message;
         }
 
-        private static string _baseUrl;
-
-        /// <summary>
-        /// Enable Linking to Images instead of embedding them
-        /// </summary>
-        /// <remarks>Any image that has a full url will be linked to instead of embedded in the HTML email.  
-        /// Images with a relative url will can be linked as well if WebBaseUrl is set.
-        /// </remarks>
-        /// <seealso cref="WebBaseUrl"/>
-        public static bool LinkWebImages { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the field pattern for mail merge templates.
-        /// </summary>
-        /// <remarks>The default FieldPattern is {{0}}.  Suggested alternatives are &lt;%{0}%&gt; or [{0}].  Note that the field pattern must contain {0}.</remarks>
-        public static string FieldPattern
+        /// <summary>Removes any script tags.</summary>
+        /// <remarks><para>this method still has to be fully implemented.</para></remarks>
+        /// <param name="content">content to be sanitised</param>
+        /// <returns>sanitised content</returns>
+        private static string SanitiseHtml(this string content)
         {
-            get { return fieldPattern; }
-            set { fieldPattern = value; }
+            return content;
         }
 
-        /// <summary>
-        /// Gets or Sets basic field delimiters used when creating email templates.
-        /// </summary>
+        /// <summary>Replaces the url with a standard full url.</summary>
         /// <remarks>
-        ///   Specify the Field delimiters used when creating email templates.  This sets the Field Pattern up based on the following rules:
-        ///       If a single delimiter character is specified, it will be assumed to have been placed at the start of the and end of the field.
-        ///       Otherwise, two delimiter characters will be split so that the first is at the start and the second is at the end.
-        ///  </remarks>
-        public static string FieldDelimiters
+        /// <para>Added the checks for /http* to take into account invalid urls formatted by TinyMCE adding '/' to the start.</para>
+        /// </remarks>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private static string ReplaceUrl(string url)
         {
-            get { return fieldDelimiters; }
-            set { 
-                if (string.IsNullOrEmpty(value) || value.Trim() == "")
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                return url;
+            }
+
+            url = !url.StartsWith("~/") ? 
+                    (!url.StartsWith("/http:") ? 
+                        (!url.StartsWith("/https:") ? 
+                            (!url.StartsWith("/") ? $"{WebBaseUrl}/{url}" : WebBaseUrl + url) : 
+                            url.Substring(1)) : 
+                        url.Substring(1)) : 
+                    url.Replace("~/", WebBaseUrl + "/");
+
+            return url;
+        }
+
+        /// <summary>
+        /// Expands out local urls (those not containing any server/scheme parts) to full urls.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        private static string ExpandUrls(this string content)
+        {
+            foreach (Match match in new Regex("(?<fullHref>(href=(?<quote>\"|'))(?<url>[^\"|']+)(\\k<quote>))").Matches(content))
+            {
+                string url = match.Groups["url"].Value;
+                string fullHref = match.Groups["fullHref"].Value;
+
+                string newValue = ReplaceUrl(url);
+                string replacement = fullHref.Replace(url, newValue);
+
+                if (content.Contains(fullHref) && !(url == newValue))
+                {
+                    content = Regex.Replace(content, Regex.Escape(fullHref), replacement, RegexOptions.IgnoreCase);
+                }
+            }
+            return content;
+        }
+
+        /// <summary>
+        /// Parses the html body for attachments.  Valid attachments are images embedded in html with src or background attributes
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="resources"></param>
+        /// <returns></returns>
+        private static string ExtractFiles(this string content, List<LinkedResource> resources)
+        {
+            HttpContext context = HttpContext.Current;
+            void replaceResource(string imgType, string url)
+            {
+                if (string.IsNullOrEmpty(url))
+                {
                     return;
-                fieldDelimiters = value;
-                if (fieldDelimiters.Length == 1)
-                    FieldPattern = String.Format("{0}{{0}}{0}", value);
+                }
+
+                LinkedResource linkedResource = null;
+                if (imgType == "jpg")
+                {
+                    imgType = "jpeg";
+                }
+
+                string fullUrl = ReplaceUrl(url);
+                if (fullUrl.StartsWith("http://") || fullUrl.StartsWith("https://"))
+                {
+                    if (!LinkWebImages)
+                    {
+                        try
+                        {
+                            linkedResource = new LinkedResource(WebRequest.Create(fullUrl).GetResponse().GetResponseStream(), $"image/{imgType}");
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+                else if (context != null)
+                {
+                    fullUrl = context.Server.MapPath(fullUrl);
+                    try
+                    {
+                        linkedResource = new LinkedResource(fullUrl, $"image/{imgType}");
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                if (linkedResource != null)
+                {
+                    string cid = Guid.NewGuid().ToString("N");
+                    linkedResource.ContentId = cid;
+                    resources.Add(linkedResource);
+                    content = Regex.Replace(content, Regex.Escape(url), $"cid:{cid}", RegexOptions.IgnoreCase);
+                }
                 else
-                    FieldPattern = String.Format("{0}{{0}}{1}", value[0], value[1]);
+                {
+                    content = Regex.Replace(content, Regex.Escape(url), fullUrl, RegexOptions.IgnoreCase);
+                }
+            }
+
+            foreach (Match match in new Regex("(?<fullSrc>((src|background)=(?<quote>\"|'))(?<url>([^\"|']+)(?<imgType>jpg|jpeg|gif|png|bmp)([^\"|']*))(\\k<quote>))", 
+                                                RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture).Matches(content))
+            {
+                string type = match.Groups["imgType"].Value;
+                string url = match.Groups["url"].Value;
+                string source = match.Groups["fullSrc"].Value;
+                if (content.Contains(source))
+                {
+                    replaceResource(type, url);
+                }
+            }
+            return content;
+        }
+
+        private static void SendMessage(MailMessage message)
+        {
+            new SmtpClient { EnableSsl = EnableSsl }.Send(message);
+        }
+
+        private static void AddAddresses(this MailAddressCollection collection, object addresses)
+        {
+            if (addresses is MailAddressCollection addressCollection)
+            {
+                foreach (MailAddress address in addressCollection)
+                    collection.Add(address);
+            }
+            else
+            {
+                if (!(addresses is string) || string.IsNullOrEmpty(addresses.ToString()))
+                {
+                    return;
+                }
+
+                string strAddresses = addresses.ToString();
+
+                foreach (string address in strAddresses.Split(new char[1] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    collection.Add(new MailAddress(address));
+                }
             }
         }
 
+        private static MailAddress FormatAddress(object address)
+        {
+            if (address == null)
+            {
+                return null;
+            }
 
-        /// <summary>
-        /// Enables or Disables the SSL protocol.  Disabled by default.
-        /// </summary>
-        public static bool EnableSsl{get;set;}
-
-        ///// <summary>
-        ///// Gets the list of Attachments generated by parsing a HTML body.  Includes all embedded images
-        ///// </summary>
-        //public static List<Attachment> Attachments
-        //{
-        //    get
-        //    {
-        //        if (attachments == null)
-        //            attachments = new List<Attachment>();
-        //        return attachments;
-        //    }
-        //}
-
+            return (address as MailAddress) ?? new MailAddress(address.ToString());
+        }
     }
 }
-

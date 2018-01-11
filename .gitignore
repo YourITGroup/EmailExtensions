@@ -155,3 +155,4 @@ $RECYCLE.BIN/
 /Refactored.Email/Help/Refactored.Email.chm
 /Refactored.Email/Help/Refactored.Email.chm.zip
 *.nupkg
+.vs

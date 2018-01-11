@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Refactored.Email")]
 [assembly: AssemblyDescription("SMTP Mail with Template and Mail Merge support")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Digitalsmith Pty Ltd")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Refactored.Email")]
-[assembly: AssemblyCopyright("Copyright © Digitalsmith 2008 - 2014")]
+[assembly: AssemblyCopyright("Copyright © Robert Foster 2008 - 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.3.2.0")]
-[assembly: AssemblyFileVersion("1.3.2.0")]
+[assembly: AssemblyFileVersion("2.1.3.1")]
+[assembly: AssemblyVersion("2.1.3.1")]
