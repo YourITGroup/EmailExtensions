@@ -7,6 +7,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Configuration;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Security;
@@ -505,6 +506,14 @@ namespace Refactored.Email
         /// <returns></returns>
         public static MailMessage AddMessageAddresses(this MailMessage message, string from, string to, string cc = null, string bcc = null)
         {
+            if (string.IsNullOrWhiteSpace(from))
+            {
+                // Attempt to get the default From address.
+                var smtpSection = (SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
+                if (smtpSection != null)
+                    from = smtpSection.From;
+            }
+
             message.From = FormatAddress(from);
             message.CC.AddAddresses(cc);
             message.Bcc.AddAddresses(bcc);
