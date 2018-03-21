@@ -5,21 +5,33 @@
         <version>$version$</version>
         <title>Refactored.Email</title>
         <authors>Robert Foster</authors>
-        <owners>Digitalsmith Pty Ltd</owners>
+        <owners>Robert Foster</owners>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</description>
         <summary>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</summary>
-        <copyright>Copyright 2011-2013 Digitalsmith Pty Ltd</copyright>
+        <copyright>Copyright 2011-2018 Robert Foster</copyright>
         <releaseNotes>
 <![CDATA[Email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities
-        
-!Important!        
-Version 1.3.0.0 introduces breaking changes to the Email.SendEmail method in that the method parameter list has been reordered to better support optional parameters.
-]]>
+
+Version 2.1.2.0:
+* Better management of broken image urls in template body content when trying to embed them in the message as attachments.
+
+Version 2.1.0.0:
+* Support for attachments and IEnumerable fields.
+** IEnumerable fields will be rendered as a list of strings.  If the body is detected as HTML the list will be rendered in a <ul> list.
+
+!Important!
+Version 2.0.0.0:
+* Now targeting v4.5
+* New MailMessage Extension Methods available
+* PrepareAlternateView method now uses the default encoding instead of forcing to UTF8.
+* PrepareAlternateView method now uses an optional parameter for contentType set by default to text/plain
+
+Version 1.3.0.0 introduces breaking changes to the Email.SendEmail method in that the method parameter list has been reordered to better support optional parameters.]]>
 </releaseNotes>
         
         <language />
-      <iconUrl>http://apps.refactored.com.au/assets/Refactored_32.png</iconUrl>
+      <!--<iconUrl>http://apps.refactored.com.au/assets/Refactored_32.png</iconUrl>-->
       <tags>Email MailMerge Template</tags>
     </metadata>
 </package>

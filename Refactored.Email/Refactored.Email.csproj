@@ -18,7 +18,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -93,13 +93,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>cd "$(ProjectDir)"
+    <PostBuildEvent>REM IF $(ConfigurationName) EQU "Release" (
+cd "$(ProjectDir)"
 "$(SolutionDir).nuget\NuGet.exe" pack -Verbosity detailed -NonInteractive -Prop Configuration=Release
 rem "$(SolutionDir).nuget\NuGet.exe" push *.nupkg -s http://nuget.refactored.net.au/ 65C4AFCC-0431-4BB5-B8FB-914F3573D323
 
-
-"$(SolutionDir).nuget\NuGet.exe" setApiKey 8338d79e-0b8e-4177-9412-808bc62cbd45         
-"$(SolutionDir).nuget\NuGet.exe" push *.nupkg</PostBuildEvent>
+REM "$(SolutionDir).nuget\NuGet.exe" setApiKey 8338d79e-0b8e-4177-9412-808bc62cbd45         
+REM "$(SolutionDir).nuget\NuGet.exe" push *.nupkg
+REM )</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)"

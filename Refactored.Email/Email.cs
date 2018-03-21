@@ -20,7 +20,7 @@ using System.Web;
  * Copyright 2006-2018 R & E Foster & Associates P/L
  * 
  * Contact: http://refoster.com.au/
- * Email:   mailto:info@refoster.com.au
+ * Email:   mailto:hello@refoster.com.au
  * 
  * This code remains the property of R & E Foster & Associates, and is used under non-exclusive license.
  */
@@ -32,9 +32,8 @@ namespace Refactored.Email
     /// SMTP Email Functionality includes Mail Merge and HTML/Plain text alternate views.
     /// </summary>
     /// <remarks>
-    ///  <para>Copyright 2006-2013 R &amp; E Foster &amp; Associates P/L, 2013 - 2014 Digitalsmith Pty Ltd </para>
-    ///  <para>Documentation &amp; Download: <a href="http://digitalsmith.com.au/">http://digitalsmith.com.au/</a> </para>
-    ///  <para>Email:  <a href="mailto:info@digitalsmith.com.au">info@digitalsmith.com.au</a> </para>
+    ///  <para>Copyright 2006-2018 R &amp; E Foster &amp; Associates P/L </para>
+    ///  <para>Email:  <a href="mailto:hello@refoster.com.au">hello@refoster.com.au</a> </para>
     /// </remarks>
     public static class Email
     {
@@ -125,6 +124,7 @@ namespace Refactored.Email
         /// <param name="plainBody">Plain text formatted content</param>
         /// <param name="cc">CC email addresses, separated by ";"</param>
         /// <param name="bcc">BCC email addresses, separated by ";"</param>
+        /// <param name="attachments">List of attachments to add to the email</param>
         public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "", IEnumerable<Attachment> attachments = null)
         {
             if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
@@ -191,30 +191,34 @@ namespace Refactored.Email
             if (string.IsNullOrEmpty(content))
                 return null;
 
-            AlternateView alternateViewFromString;
+            AlternateView view;
             if (string.IsNullOrEmpty(contentType))
             {
-                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content);
+                view = AlternateView.CreateAlternateViewFromString(content);
             }
             else if (contentType == "text/html")
             {
                 List<LinkedResource> resources = new List<LinkedResource>();
                 content = content.ExtractFiles(resources).ExpandUrls().SanitiseHtml();
-                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
-                alternateViewFromString.ContentType.CharSet = Encoding.UTF8.WebName;
-                alternateViewFromString.BaseUri = new Uri(Refactored.Email.Email.WebBaseUrl);
+                view = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
+                view.ContentType.CharSet = Encoding.UTF8.WebName;
+                if (!string.IsNullOrWhiteSpace(WebBaseUrl))
+                {
+                    view.BaseUri = new Uri(WebBaseUrl);
+                }
+
                 if (resources.Count > 0)
                 {
                     foreach (LinkedResource linkedResource in resources)
-                        alternateViewFromString.LinkedResources.Add(linkedResource);
+                        view.LinkedResources.Add(linkedResource);
                 }
             }
             else
             {
-                alternateViewFromString = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
+                view = AlternateView.CreateAlternateViewFromString(content, new ContentType(contentType));
             }
 
-            return alternateViewFromString;
+            return view;
         }
 
         /// <summary>
@@ -224,17 +228,17 @@ namespace Refactored.Email
         /// <returns></returns>
         public static string ValidateEmailAddress(string email)
         {
-            string str = string.Empty;
+            string msg = string.Empty;
             try
             {
                 MailAddress mailAddress = new MailAddress(email);
             }
             catch (Exception ex)
             {
-                str = ex.Message;
+                msg = ex.Message;
             }
 
-            return str;
+            return msg;
         }
 
         /// <summary>
@@ -255,7 +259,8 @@ namespace Refactored.Email
         /// <returns></returns>
         public static string GetMessageTemplate(string templateName)
         {
-            string templateDirectory = HttpContext.Current.Server.MapPath(MailTemplateDirectory);
+            string templateDirectory = HttpContext.Current?.Server?.MapPath(MailTemplateDirectory) ?? MailTemplateDirectory;
+
             string template = ConfigurationManager.AppSettings[templateName];
             if (string.IsNullOrEmpty(template))
             {
@@ -378,7 +383,7 @@ namespace Refactored.Email
         /// Returns the content of the message with mail merged parameters
         /// </summary>
         /// <param name="content">message body to be merged with with mail merge data</param>
-        /// <param name="parameters">Collection of field values containing mail merge data</param>
+        /// <param name="parameters">Collection of field values containing mail merge data.  Any parameter that contains enumerated data will be rendered as a list.</param>
         /// <param name="subject">Retrieves the subject of the email from the title if present (looks for <code>&lt;title&gt;&lt;/title&gt;</code> tags)</param>
         /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplate(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content that has been parsed and updated</returns>
@@ -597,15 +602,32 @@ namespace Refactored.Email
                 return url;
             }
 
-            url = !url.StartsWith("~/") ? 
-                    (!url.StartsWith("/http:") ? 
-                        (!url.StartsWith("/https:") ? 
-                            (!url.StartsWith("/") ? $"{WebBaseUrl}/{url}" : WebBaseUrl + url) : 
-                            url.Substring(1)) : 
-                        url.Substring(1)) : 
-                    url.Replace("~/", WebBaseUrl + "/");
+            if (url.StartsWith("~/"))
+            {
+                return url.Replace("~/", WebBaseUrl + "/");
+            }
+            else if (url.StartsWith("/http:") || url.StartsWith("/https:"))
+            {
+                return url.Substring(1);
+            }
+            else if (url.StartsWith("/"))
+            {
+                return $"{WebBaseUrl}{url}";
+            }
+            else
+            {
+                return $"{WebBaseUrl}/{url}";
+            }
 
-            return url;
+            //url = !url.StartsWith("~/") ? 
+            //        (!url.StartsWith("/http:") ? 
+            //            (!url.StartsWith("/https:") ? 
+            //                (!url.StartsWith("/") ? $"{WebBaseUrl}/{url}" : WebBaseUrl + url) : 
+            //                url.Substring(1)) : 
+            //            url.Substring(1)) : 
+            //        url.Replace("~/", WebBaseUrl + "/");
+
+            //return url;
         }
 
         /// <summary>
