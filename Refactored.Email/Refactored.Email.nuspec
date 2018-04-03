@@ -10,6 +10,7 @@
         <description>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</description>
         <summary>Encapsulates email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities</summary>
         <copyright>Copyright 2011-2018 Robert Foster</copyright>
+        <projectUrl>https://github.com/robertjf/EmailExtensions</projectUrl>
         <releaseNotes>
 <![CDATA[Email sending capabilities to enable sending HTML email with embedded images and field parsing for mail-merge like capabilities
 

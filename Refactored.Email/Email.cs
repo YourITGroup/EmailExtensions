@@ -179,6 +179,21 @@ namespace Refactored.Email
                 SendMessage(message.PrepareMessage(htmlBody, plainBody, attachments));
             }
         }
+        /// <summary>
+        /// Sends an Email with a Html body and an alternate Text body.
+        /// </summary>
+        /// <param name="from">From email address</param>
+        /// <param name="to">Collection of Email Addresses to send the email to</param>
+        /// <param name="subject">Email subject</param>
+        /// <param name="htmlBody">HTML formatted content</param>
+        /// <param name="plainBody">Plain text formatted content</param>
+        /// <param name="cc">Collection of Email Addresses to copy the email to</param>
+        /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
+        /// <param name="attachments">Collection of attachments to add to the message</param>
+        public static void SendEmail(MailAddress from, MailAddress to, string subject, string htmlBody, string plainBody, MailAddress cc = null, MailAddress bcc = null, IEnumerable<Attachment> attachments = null)
+        {
+            SendEmail(from, new MailAddressCollection { to }, subject, htmlBody, plainBody, new MailAddressCollection { cc }, new MailAddressCollection { bcc }, attachments);
+        }
 
         /// <summary>
         /// Prepares an alternate email view.  Email views can be html or plain text.
