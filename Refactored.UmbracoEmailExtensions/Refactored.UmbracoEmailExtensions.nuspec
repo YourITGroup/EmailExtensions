@@ -5,7 +5,7 @@
     <version>$version$</version>
     <title>Refactored.UmbracoEmailExtensions</title>
     <authors>Robert Foster</authors>
-    <owners>Digitalsmith Pty Ltd</owners>
+    <owners>Quantum Sky</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
       <![CDATA[Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates.
@@ -14,12 +14,15 @@ This package extends UmbracoHelper providing a SendFormData extension method to 
           ]]>
     </description>
     <summary>Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates</summary>
-    <copyright>Copyright 2012-2014 Digitalsmith Pty Ltd</copyright>
+    <copyright>Copyright 2012-2018 Robert Foster</copyright>
     <language />
     <releaseNotes>
       <![CDATA[Provides the ability to send email from within Umbraco based on a POCO model and Content Email Templates.
 
 This package extends UmbracoHelper providing a SendFormData extension method to send emails using specified Content nodes as templates.
+
+New in Version 3:
+* Upgraded to Umbraco 7.7.0
 
 New in Version 2:
 * Message Centre Dashboard allows users to track messages sent and received on the site and provides the ability to reply and archive messages.

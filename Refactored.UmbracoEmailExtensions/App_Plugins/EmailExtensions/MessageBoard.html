@@ -1,0 +1,31 @@
+﻿<div id="messageBoard">
+    <h3 class="bold">Messages</h3>
+
+    <div ng-show="loading">
+        <div class="umb-healthcheck-group__details-status-overlay"></div>
+        <umb-load-indicator></umb-load-indicator>
+    </div>
+    <div ng-hide="loading" class="umb-healthcheck-group__details">
+
+        <div class="row-fluid filter">
+            <label for="filterText">Filter:</label>
+            <input type="text" name="filterText" />
+
+
+        </div>
+        <div class="row-fluid"
+             ng-init="init('http://umbraco.org/feeds/videos/members')"
+             ng-controller="Umbraco.Dashboard.StartupVideosController">
+
+            <ul class="thumbnails">
+                <li class="span2" ng-repeat="video in videos">
+                    <div class="thumbnail" style="margin-right: 20px">
+                        <a target="_blank" href="{{video.link}}" title="{{video.title}}">
+                            <img ng-src="{{video.thumbnail}}" alt="{{video.title}}">
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
