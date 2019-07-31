@@ -24,7 +24,7 @@ using System.Web;
  * 
  * This code remains the property of R & E Foster & Associates, and is used under non-exclusive license.
  */
-[assembly:AllowPartiallyTrustedCallers]
+[assembly: AllowPartiallyTrustedCallers]
 
 namespace Refactored.Email
 {
@@ -61,11 +61,9 @@ namespace Refactored.Email
         ///      If a single delimiter character is specified, it will be assumed to have been placed at the start and end of the field.
         ///      Otherwise, two delimiter characters will be split so that the first is at the start and the second is at the end.
         /// </remarks>
-        public static string FieldDelimiters
-        {
+        public static string FieldDelimiters {
             get => _fieldDelimiters;
-            set
-            {
+            set {
                 if (string.IsNullOrEmpty(value) || value.Trim() == "")
                 {
                     return;
@@ -98,10 +96,8 @@ namespace Refactored.Email
         /// Gets or Sets the Http/Https base Url for relative links found in the content templates
         /// </summary>
         /// <seealso cref="P:Refactored.Email.Email.LinkWebImages" />
-        public static string WebBaseUrl
-        {
-            get
-            {
+        public static string WebBaseUrl {
+            get {
                 if (string.IsNullOrEmpty(_baseUrl))
                 {
                     HttpContext current = HttpContext.Current;
@@ -125,7 +121,8 @@ namespace Refactored.Email
         /// <param name="cc">CC email addresses, separated by ";"</param>
         /// <param name="bcc">BCC email addresses, separated by ";"</param>
         /// <param name="attachments">List of attachments to add to the email</param>
-        public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "", IEnumerable<Attachment> attachments = null)
+        /// <param name="replyToList">List of replyTo addresses, separated by ","</param>
+        public static void SendEmail(string from, string to, string subject, string htmlBody, string plainBody, string cc = "", string bcc = "", IEnumerable<Attachment> attachments = null, string replyToList = "")
         {
             if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
             {
@@ -134,7 +131,12 @@ namespace Refactored.Email
 
             using (MailMessage message = new MailMessage().AddMessageAddresses(from, to, cc, bcc))
             {
+
                 message.Subject = subject;
+                if (!string.IsNullOrEmpty(replyToList))
+                {
+                    message.ReplyToList.Add(replyToList);
+                }
                 SendMessage(message.PrepareMessage(htmlBody, plainBody, attachments));
             }
         }
@@ -150,9 +152,9 @@ namespace Refactored.Email
         /// <param name="cc">Collection of Email Addresses to copy the email to</param>
         /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
         /// <param name="attachments">Collection of attachments to add to the message</param>
-        public static void SendEmail(string from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null)
+        public static void SendEmail(string from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null, MailAddressCollection replyTo = null)
         {
-            SendEmail(new MailAddress(from), to, subject, htmlBody, plainBody, cc, bcc, attachments);
+            SendEmail(new MailAddress(from), to, subject, htmlBody, plainBody, cc, bcc, attachments, replyTo);
         }
 
         /// <summary>
@@ -166,7 +168,7 @@ namespace Refactored.Email
         /// <param name="cc">Collection of Email Addresses to copy the email to</param>
         /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
         /// <param name="attachments">Collection of attachments to add to the message</param>
-        public static void SendEmail(MailAddress from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null)
+        public static void SendEmail(MailAddress from, MailAddressCollection to, string subject, string htmlBody, string plainBody, MailAddressCollection cc = null, MailAddressCollection bcc = null, IEnumerable<Attachment> attachments = null, MailAddressCollection replyTo = null)
         {
             if (string.IsNullOrEmpty(htmlBody) && string.IsNullOrEmpty(plainBody))
             {
@@ -176,6 +178,13 @@ namespace Refactored.Email
             using (MailMessage message = new MailMessage().AddMessageAddresses(from, to, cc, bcc))
             {
                 message.Subject = subject;
+                if(replyTo != null)
+                {
+                    foreach(MailAddress replyAddress in replyTo)
+                    {
+                        message.ReplyToList.Add(replyAddress);
+                    }
+                }
                 SendMessage(message.PrepareMessage(htmlBody, plainBody, attachments));
             }
         }
@@ -190,9 +199,9 @@ namespace Refactored.Email
         /// <param name="cc">Collection of Email Addresses to copy the email to</param>
         /// <param name="bcc">Collection of Email Addresses to "Blind" copy the email to - these won't be seen by the email client.</param>
         /// <param name="attachments">Collection of attachments to add to the message</param>
-        public static void SendEmail(MailAddress from, MailAddress to, string subject, string htmlBody, string plainBody, MailAddress cc = null, MailAddress bcc = null, IEnumerable<Attachment> attachments = null)
+        public static void SendEmail(MailAddress from, MailAddress to, string subject, string htmlBody, string plainBody, MailAddress cc = null, MailAddress bcc = null, IEnumerable<Attachment> attachments = null, MailAddress replyTo = null)
         {
-            SendEmail(from, new MailAddressCollection { to }, subject, htmlBody, plainBody, new MailAddressCollection { cc }, new MailAddressCollection { bcc }, attachments);
+            SendEmail(from, new MailAddressCollection { to }, subject, htmlBody, plainBody, new MailAddressCollection { cc }, new MailAddressCollection { bcc }, attachments, new MailAddressCollection { replyTo });
         }
 
         /// <summary>
@@ -282,7 +291,7 @@ namespace Refactored.Email
                 template = templateName;
             }
 
-            if (!templateDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()) && 
+            if (!templateDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()) &&
                 !template.StartsWith(Path.DirectorySeparatorChar.ToString()))
             {
                 return $"{templateDirectory}{Path.DirectorySeparatorChar}{template}";
@@ -729,7 +738,7 @@ namespace Refactored.Email
                 }
             }
 
-            foreach (Match match in new Regex("(?<fullSrc>((src|background)=(?<quote>\"|'))(?<url>([^\"|']+)(?<imgType>jpg|jpeg|gif|png|bmp)([^\"|']*))(\\k<quote>))", 
+            foreach (Match match in new Regex("(?<fullSrc>((src|background)=(?<quote>\"|'))(?<url>([^\"|']+)(?<imgType>jpg|jpeg|gif|png|bmp)([^\"|']*))(\\k<quote>))",
                                                 RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture).Matches(content))
             {
                 string type = match.Groups["imgType"].Value;
