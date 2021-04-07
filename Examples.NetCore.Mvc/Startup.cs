@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Refactored.Email;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,28 +25,32 @@ namespace Examples.NetCore.Mvc
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+       
         public void ConfigureServices(IServiceCollection services)
         {
-			services.AddScoped<SmtpClient>((serviceProvider) =>
-			{
-				var config = serviceProvider.GetRequiredService<IConfiguration>();
-				return new SmtpClient() {
-					Host = config.GetValue<String>("Email:Smtp:Host"),
-					Port = config.GetValue<int>("Email:Smtp:Port"),
-					Credentials = new NetworkCredential(
-							config.GetValue<String>("Email:Smtp:Username"),
-							config.GetValue<String>("Email:Smtp:Password")
-						)
-				};
-			});
+
+
+			//Add the Refactored.Email as a service
+			services.AddSingleton<Email>();
+
+			//OR see below to add as a service as set defaults.
+
+			//services.AddSingleton<Email>(sp => {
+			//	var config = sp.GetRequiredService<IConfiguration>();
+
+			//	Email email = new Email(config);
+
+			//	email.WebBaseUrl = "https://refoster.com.au";
+
+			//	return email;
+			//});
 
 
 
 			services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+      
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

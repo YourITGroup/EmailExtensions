@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="templates\htmlTemplate.html" />
+    <None Remove="templates\textTemplate.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="templates\htmlTemplate.html" />
+    <Content Include="templates\textTemplate.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 

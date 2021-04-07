@@ -14,10 +14,12 @@ namespace Examples.NetFramework.Mvc.Controllers {
         // GET api/Email/Simple
 		[HttpGet]
 		[Route("api/email/simple")]
-		public void Simple()
+		public string Simple()
         {
+			
+			Email email = new Email();
 			// Set the Mail Merge Field Pattern:
-			Email.FieldPattern = "[{0}]";
+			email.FieldPattern = "[{0}]";
 
 			// Set up our HTML and Plain Text templates:
 			string html = @"<html>
@@ -41,12 +43,15 @@ IT also contains a mail-merge field delimited by [ and ]: [date]";
 			string subject;
 
 			// We now want to parse the message templates, inserting the mail merge data and extracting the subject:
-			string htmlContent = Email.ParseMessageTemplateContent(html, parameters, out subject);
-			string textContent = Email.ParseMessageTemplateContent(text, parameters);
+			string htmlContent = email.ParseMessageTemplateContent(html, parameters, out subject);
+			string textContent = email.ParseMessageTemplateContent(text, parameters);
 
+			
 			// Send the email with both html and plain text content.
-			Email.SendEmail("no-reply@refoster.com.au", "info@refoster.com.au", subject, htmlContent, textContent);
+			email.SendEmail(null, "info@refoster.com.au", subject, htmlContent, textContent);
 			// return new string[] { "value1", "value2" };
+
+			return "Email Sent";
 		}
 
 
@@ -54,15 +59,16 @@ IT also contains a mail-merge field delimited by [ and ]: [date]";
 		// GET api/Email/Template
 		[HttpGet]
 		[Route("api/email/template")]
-		public void Template() {
+		public string Template() {
+			Email email = new Email();
 			// Set the Mail Merge Field Pattern:
-			Email.FieldPattern = "[{0}]";
+			email.FieldPattern = "[{0}]";
 
 			// Set the Base URL for hyperlinks found in the message templates
-			Email.WebBaseUrl = "http://refactored.com.au";
+			email.WebBaseUrl = "http://refactored.com.au";
 
 			// Set the directory containing the message templates
-			Email.MailTemplateDirectory = "templates/";
+			email.MailTemplateDirectory = System.Web.Hosting.HostingEnvironment.MapPath("~/templates/");
 
 			// Create a new parameters collection to hold our mail-merge fields:
 			NameValueCollection parameters = new NameValueCollection();
@@ -70,11 +76,13 @@ IT also contains a mail-merge field delimited by [ and ]: [date]";
 			string subject;
 
 			// We now want to parse the message templates, inserting the mail merge data and extracting the subject:
-			string htmlContent = Email.ParseMessageTemplate("htmlTemplate.html", parameters, out subject);
-			string textContent = Email.ParseMessageTemplate("textTemplate.txt", parameters);
+			string htmlContent = email.ParseMessageTemplate("htmlTemplate.html", parameters, out subject);
+			string textContent = email.ParseMessageTemplate("textTemplate.txt", parameters);
 
 			// Send the email with both html and plain text content.
-			Email.SendEmail("no-reply@refoster.com.au", "info@refoster.com.au", subject, htmlContent, textContent);
+			email.SendEmail("no-reply@refoster.com.au", "info@refoster.com.au", subject, htmlContent, textContent);
+
+			return "Templated Email Sent";
 		}
 
 

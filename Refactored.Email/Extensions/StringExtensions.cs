@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Refactored.Email
-{
+namespace Refactored.Email.Extensions {
     internal static class StringExtensions
     {
         internal static string Replace(this string s, string oldValue, string newValue, StringComparison comparisonType)
@@ -89,5 +88,8 @@ namespace Refactored.Email
             return content;
         }
 
-    }
+	
+
+
+	}
 }
