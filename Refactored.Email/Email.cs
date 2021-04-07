@@ -151,7 +151,11 @@ namespace Refactored.Email {
 					_smtpSettings = new SmtpSection() {
 						Host = smtpSection.GetSection("Host").Value,
 						Port = port,
-						From = smtpSection.GetSection("From").Value
+						From = smtpSection.GetSection("From").Value,
+						Credentials = new NetworkCredential(
+							smtpSection.GetSection("Username").Value,
+							smtpSection.GetSection("Password").Value
+						)
 					};
 				}
 			}
@@ -767,6 +771,7 @@ namespace Refactored.Email {
 				EnableSsl = EnableSsl,
 				Host = _smtpSettings.Host,
 				Port = _smtpSettings.Port,
+				Credentials = _smtpSettings.Credentials
 			}.Send(message);
 #endif
 

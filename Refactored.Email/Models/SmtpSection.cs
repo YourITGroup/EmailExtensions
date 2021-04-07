@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Refactored.Email.Models {
@@ -9,5 +10,7 @@ namespace Refactored.Email.Models {
 		public string From { get; set; }
 		//public string Username { get; set; }
 		//public string Password { get; set; }
+
+		public NetworkCredential Credentials {get; set;}
 	}
 }
