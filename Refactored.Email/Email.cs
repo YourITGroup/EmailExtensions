@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,13 +7,16 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Configuration;
+//using System.Net.Configuration;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using Microsoft.AspNetCore.Http;
+using Refactored.Email.Models;
+
 
 
 /*
@@ -98,14 +101,16 @@ namespace Refactored.Email
         /// <seealso cref="P:Refactored.Email.Email.LinkWebImages" />
         public static string WebBaseUrl {
             get {
-                if (string.IsNullOrEmpty(_baseUrl))
-                {
-                    HttpContext current = HttpContext.Current;
-                    if (current != null)
-                        _baseUrl = current.Request.Url.GetLeftPart(UriPartial.Authority);
-                }
+				//TODO: How do we access HttpContext.Current.Request.Url?
 
-                return _baseUrl;
+				//if (string.IsNullOrEmpty(_baseUrl))
+				//{
+				//    HttpContext current = HttpContext.Current;
+				//    if (current != null)
+				//        _baseUrl = current.Request.Url.GetLeftPart(UriPartial.Authority);
+				//}
+
+				return _baseUrl;
             }
             set => _baseUrl = value;
         }
@@ -283,7 +288,9 @@ namespace Refactored.Email
         /// <returns></returns>
         public static string GetMessageTemplate(string templateName)
         {
-            string templateDirectory = HttpContext.Current?.Server?.MapPath(MailTemplateDirectory) ?? MailTemplateDirectory;
+			//TODO: This only works for Absolute file paths
+           // string templateDirectory = HttpContext.Current?.Server?.MapPath(MailTemplateDirectory) ?? MailTemplateDirectory;
+            string templateDirectory =MailTemplateDirectory;
 
             string template = ConfigurationManager.AppSettings[templateName];
             if (string.IsNullOrEmpty(template))
@@ -309,8 +316,10 @@ namespace Refactored.Email
                 subject = match.Groups["pageTitle"].Value.Trim().Replace(Environment.NewLine, " ").Replace("  ", " ");
                 try
                 {
-                    subject = HttpContext.Current.Server.HtmlDecode(subject);
-                }
+					//subject = HttpContext.Current.Server.HtmlDecode(subject);
+					subject = HttpUtility.UrlDecode(subject);
+
+				}
                 catch
                 {
                 }
@@ -386,9 +395,9 @@ namespace Refactored.Email
         /// <seealso cref="M:Refactored.Email.Email.GetMessageTemplate(System.String)" />
         /// <seealso cref="M:Refactored.Email.Email.ParseMessageTemplateContent(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})" />
         /// <returns>Content of the named Template file</returns>
-        public static string ParseMessageTemplate(string templateName, NameValueCollection parameters, out string subject)
+        public static string ParseMessageTemplate(string templateName, NameValueCollection ValueParameters, out string subject)
         {
-            return ParseMessageTemplate(templateName, parameters, out subject);
+            return ParseMessageTemplate(templateName: templateName, parameters: ValueParameters, subject: out subject);
         }
 
         /// <summary>
@@ -685,7 +694,7 @@ namespace Refactored.Email
         /// <returns></returns>
         private static string ExtractFiles(this string content, List<LinkedResource> resources)
         {
-            HttpContext context = HttpContext.Current;
+           // HttpContext context = HttpContext.Current;
             void replaceResource(string imgType, string url)
             {
                 if (string.IsNullOrEmpty(url))
@@ -713,9 +722,10 @@ namespace Refactored.Email
                         }
                     }
                 }
-                else if (context != null)
+                else
                 {
-                    fullUrl = context.Server.MapPath(fullUrl);
+					//TODO: This only works with absolut File paths
+                   // fullUrl = context.Server.MapPath(fullUrl);
                     try
                     {
                         linkedResource = new LinkedResource(fullUrl, $"image/{imgType}");
