@@ -131,7 +131,7 @@ namespace Refactored.Email {
 		}
 #elif NETSTANDARD2_0
 
-		private SmtpSection _smtpSettings { get; set; }
+		public SmtpSection SmtpSettings { get; set; }
 
 		public Email(IConfiguration iConfiguration) {
 			var emailSection = iConfiguration.GetSection("Email");
@@ -148,7 +148,7 @@ namespace Refactored.Email {
 					if (!string.IsNullOrEmpty(smtpSection.GetSection("Port")?.Value)) {
 						port = int.Parse(smtpSection.GetSection("Port").Value);
 					}
-					_smtpSettings = new SmtpSection() {
+					SmtpSettings = new SmtpSection() {
 						Host = smtpSection.GetSection("Host").Value,
 						Port = port,
 						From = smtpSection.GetSection("From").Value,
@@ -723,8 +723,8 @@ namespace Refactored.Email {
 					from = smtpSection.From;
 				}
 #elif NETSTANDARD2_0
-				if (!string.IsNullOrEmpty(_smtpSettings.From)) {
-					from = _smtpSettings.From;
+				if (!string.IsNullOrEmpty(SmtpSettings.From)) {
+					from = SmtpSettings.From;
 				}
 #endif
 
@@ -769,9 +769,9 @@ namespace Refactored.Email {
 #elif NETSTANDARD2_0
 			new SmtpClient {
 				EnableSsl = EnableSsl,
-				Host = _smtpSettings.Host,
-				Port = _smtpSettings.Port,
-				Credentials = _smtpSettings.Credentials
+				Host = SmtpSettings.Host,
+				Port = SmtpSettings.Port,
+				Credentials = SmtpSettings.Credentials
 			}.Send(message);
 #endif
 
