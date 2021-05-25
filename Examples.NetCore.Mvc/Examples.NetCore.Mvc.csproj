@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="templates\htmlTemplate.html" />
+    <None Remove="templates\textTemplate.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="templates\htmlTemplate.html" />
+    <Content Include="templates\textTemplate.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Refactored.Email\Refactored.Email.csproj" />
+  </ItemGroup>
+
+
+</Project>

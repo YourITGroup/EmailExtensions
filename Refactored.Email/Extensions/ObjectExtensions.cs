@@ -2,8 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 
-namespace Refactored.Email
-{
+namespace Refactored.Email.Extensions {
     internal static class ObjectExtensions
     {
         /// <summary>Turns object into dictionary</summary>
