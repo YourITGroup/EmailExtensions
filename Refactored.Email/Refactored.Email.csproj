@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>
-			netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+	<Version>3.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,24 +14,35 @@
   <ItemGroup>
     <None Include="Refactored.Email.shfbproj" />
   </ItemGroup>
-
-
 	<!-- Conditionally obtain references for the .NET Framework 4.5 target -->
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
 		<Reference Include="System" />
 		<Reference Include="System.Configuration" />
 		<Reference Include="System.Net.Http" />
 		<Reference Include="System.Web" />
-		<!--<Reference Include="System.Threading.Tasks" />-->
-		
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions">
 	    <Version>5.0.0</Version>
 	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+	    <Version>5.0.0</Version>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions">
+	    <Version>5.0.0</Version>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Options">
+	    <Version>5.0.0</Version>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions">
+	    <Version>5.0.0</Version>
+	  </PackageReference>
 	  <PackageReference Include="System.Configuration.ConfigurationManager">
 	    <Version>5.0.0</Version>
 	  </PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Models\" />
 	</ItemGroup>
 	
 </Project>

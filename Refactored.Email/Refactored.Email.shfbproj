@@ -25,14 +25,14 @@
 
 Copyright 2006-2010 R &amp;amp%3bamp%3b E Foster &amp;amp%3bamp%3b Associates P/L
 
-For Documentation Updates and Download go to http://refoster.com.au/
+For Documentation Updates and Download go to http://youritteam.com.au/
  
-Email:   mailto:info%40refoster.com.au</ProjectSummary>
+Email:   mailto:info%40youritteam.com.au</ProjectSummary>
     <HelpTitle>Refactored.Email Class Library</HelpTitle>
     <CopyrightText>Copyright 2010 R &amp;amp%3b E Foster &amp;amp%3b Associates%3b All Rights Reserved</CopyrightText>
     <CopyrightHref>http://refactored.com.au</CopyrightHref>
-    <FeedbackEMailAddress>info%40refoster.com.au</FeedbackEMailAddress>
-    <FeedbackEMailLinkText>info%40refoster.com.au</FeedbackEMailLinkText>
+    <FeedbackEMailAddress>info%40youritteam.com.au</FeedbackEMailAddress>
+    <FeedbackEMailLinkText>info%40youritteam.com.au</FeedbackEMailLinkText>
     <SyntaxFilters>CSharp, VisualBasic, CPlusPlus, AspNet</SyntaxFilters>
     <Preliminary>True</Preliminary>
     <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, TypeParameter, AutoDocumentDispose</MissingTags>

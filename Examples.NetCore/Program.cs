@@ -1,40 +1,40 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Refactored.Email;
+using System;
 using System.Collections.Specialized;
 using System.IO;
-using Microsoft.Extensions.Configuration;
-using Refactored.Email;
 
 namespace Examples.NetCore
 {
     class Program
     {
-		static IConfiguration _configuration;
+        static IConfiguration _configuration;
 
-		static void Main(string[] args)
+        static void Main(string[] args)
         {
-			_configuration = new ConfigurationBuilder()
-	.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-	//.AddEnvironmentVariables()
-	.AddCommandLine(args)
-	.Build();
+            _configuration = new ConfigurationBuilder()
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        //.AddEnvironmentVariables()
+                        .AddCommandLine(args)
+                        .Build();
+
+            //SimpleSend();
+
+            TemplateSend();
+
+        }
 
 
-			//SimpleSend();
 
-			TemplateSend();
+        public static void SimpleSend()
+        {
+            Sender sender = new Sender(new Refactored.Email.Configuration.EmailOptions
+            {
+                FieldPattern = "[{0}]"
+            });
 
-		}
-
-
-
-		public static void SimpleSend() {
-			Email email = new Email(_configuration);
-
-			// Set the Mail Merge Field Pattern:
-			email.FieldPattern = "[{0}]";
-
-			// Set up our HTML and Plain Text templates:
-			string html = @"<html>
+            // Set up our HTML and Plain Text templates:
+            string html = @"<html>
     <head>
         <title>Simple Html Email</title>
     </head>
@@ -45,51 +45,54 @@ namespace Examples.NetCore
     </body>
 </html>";
 
-			string text = @"Hello World!
+            string text = @"Hello World!
 This email contains a link to the Refactored Website: http://refactored.com.au
 IT also contains a mail-merge field delimited by [ and ]: [date]";
 
-			// Create a new parameters collection to hold our mail-merge fields:
-			NameValueCollection parameters = new NameValueCollection();
-			parameters.Add("date", DateTime.Today.ToString());
-			string subject;
+            // Create a new parameters collection to hold our mail-merge fields:
+            NameValueCollection parameters = new NameValueCollection();
+            parameters.Add("date", DateTime.Today.ToString());
+            string subject;
 
-			// We now want to parse the message templates, inserting the mail merge data and extracting the subject:
-			string htmlContent = email.ParseMessageTemplateContent(html, parameters, out subject);
-			string textContent = email.ParseMessageTemplateContent(text, parameters);
-
-			
-
-			// Send the email with both html and plain text content.
-			email.SendEmail("no-reply@refoster.com.au", "info@refoster.com.au", subject, htmlContent, textContent);
-		}
+            // We now want to parse the message templates, inserting the mail merge data and extracting the subject:
+            string htmlContent = sender.ParseMessageTemplateContent(html, parameters, out subject);
+            string textContent = sender.ParseMessageTemplateContent(text, parameters);
 
 
 
-		public static void TemplateSend() {
-			Email email = new Email(_configuration);
-			// Set the Mail Merge Field Pattern:
-			email.FieldPattern = "[{0}]";
+            // Send the email with both html and plain text content.
+            sender.Send("no-reply@youritteam.com.au", "info@youritteam.com.au", subject, htmlContent, textContent);
+        }
 
-			// Set the Base URL for hyperlinks found in the message templates
-			email.WebBaseUrl = "http://refactored.com.au";
 
-			// Set the directory containing the message templates
-			email.MailTemplateDirectory = Directory.GetCurrentDirectory() + "/templates";
 
-			// Create a new parameters collection to hold our mail-merge fields:
-			NameValueCollection parameters = new NameValueCollection();
-			parameters.Add("date", DateTime.Today.ToString());
-			string subject;
+        public static void TemplateSend()
+        {
+            Sender sender = new Sender(new Refactored.Email.Configuration.EmailOptions
+            {
+                // Set the Mail Merge Field Pattern:
+                FieldPattern = "[{0}]",
 
-			// We now want to parse the message templates, inserting the mail merge data and extracting the subject:
-			string htmlContent = email.ParseMessageTemplate("htmlTemplate.html", parameters, out subject);
-			string textContent = email.ParseMessageTemplate("textTemplate.txt", parameters);
+                // Set the Base URL for hyperlinks found in the message templates
+                WebBaseUrl = "http://refactored.com.au",
 
-			// Send the email with both html and plain text content.
-			email.SendEmail("no-reply@refoster.com.au", "info@refoster.com.au", subject, htmlContent, textContent);
+                // Set the directory containing the message templates
+                MailTemplateDirectory = Directory.GetCurrentDirectory() + "/templates"
+            });
 
-			
-		}
-	}
+            // Create a new parameters collection to hold our mail-merge fields:
+            NameValueCollection parameters = new NameValueCollection();
+            parameters.Add("date", DateTime.Today.ToString());
+            string subject;
+
+            // We now want to parse the message templates, inserting the mail merge data and extracting the subject:
+            string htmlContent = sender.ParseMessageTemplate("htmlTemplate.html", parameters, out subject);
+            string textContent = sender.ParseMessageTemplate("textTemplate.txt", parameters);
+
+            // Send the email with both html and plain text content.
+            sender.Send("no-reply@youritteam.com.au", "info@youritteam.com.au", subject, htmlContent, textContent);
+
+
+        }
+    }
 }
