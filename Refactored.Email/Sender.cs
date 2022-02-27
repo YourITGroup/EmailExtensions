@@ -329,6 +329,10 @@ namespace Refactored.Email
                     // Replace the original param with the build list for further processing.
                     param = !isHtml ? stringBuilder.ToString() : $"<ul>{stringBuilder}</ul>";
                 }
+                else if (isHtml && Options.ConvertNewlineToBreak && (param is string) && param.ToString().Contains(Environment.NewLine))
+                {
+                    param = param.ToString().Replace(Environment.NewLine, "<br />");
+                }
                 content = content.Replace(string.Format(Options.FieldPattern, key), param.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
             }
             subject = ExtractSubject(content);
@@ -362,7 +366,7 @@ namespace Refactored.Email
         /// <returns>Content that has been parsed and updated</returns>
         public string ParseMessageTemplateContent<T>(string content, T parameters)
         {
-            return ParseMessageTemplateContent(content, parameters, out string subject);
+            return ParseMessageTemplateContent(content, parameters, out _);
         }
 
         /// <summary>
@@ -397,7 +401,7 @@ namespace Refactored.Email
         /// <returns>Content that has been parsed and updated</returns>
         public string ParseMessageTemplateContent(string content, NameValueCollection parameters)
         {
-            return ParseMessageTemplateContent(content, parameters, out string subject);
+            return ParseMessageTemplateContent(content, parameters, out _);
         }
 
         /// <summary>
@@ -410,9 +414,21 @@ namespace Refactored.Email
         /// <returns>Content that has been parsed and updated</returns>
         public string ParseMessageTemplateContent(string content, NameValueCollection parameters, out string subject)
         {
+            bool isHtml = !string.IsNullOrEmpty(ExtractSubject(content));
             foreach (string key in parameters.Keys)
             {
-                content = content.Replace(string.Format(Options.FieldPattern, key), parameters[key] ?? "", StringComparison.OrdinalIgnoreCase);
+                var val = parameters[key];
+                if (isHtml && Options.ConvertNewlineToBreak && (val is string) && val.ToString().Contains(Environment.NewLine))
+                {
+                    val = val.ToString().Replace(Environment.NewLine, "<br />");
+                }
+
+                foreach (var transform in Options.FieldTransforms.Keys)
+                {
+                    var tKey = string.Format(Options.FieldPattern, key.Replace(transform, Options.FieldTransforms[transform]));
+                    content = content.Replace(tKey, val.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
+                }
+                content = content.Replace(string.Format(Options.FieldPattern, key), val.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
             }
 
             subject = ExtractSubject(content);
