@@ -2,7 +2,18 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-	<Version>3.0.0.0</Version>
+	<Version>3.0.0.0-rc001</Version>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>Robert Foster</Authors>
+	<Company>Your IT Group</Company>
+	<Product>$(AssemblyName) - Simple Email sending for dotNet</Product>
+	<Description>A generic Email Library built around the .Net 4.5 System.Net.Mail set of classes.
+SMTP Email Functionality includes Mail Merge and HTML/Plain text alternate views.</Description>
+	<Copyright>Copyright © Your IT Group Pty Ltd</Copyright>
+	<PackageReadmeFile>README.nuget.md</PackageReadmeFile>
+	<PackageProjectUrl>https://github.com/YourITGroup/EmailExtensions</PackageProjectUrl>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.nuget.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="Refactored.Email.shfbproj" />
   </ItemGroup>
 	<!-- Conditionally obtain references for the .NET Framework 4.5 target -->
