@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-	<Version>3.0.0.0-rc001</Version>
+	<Version>3.0.0-rc001</Version>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<Authors>Robert Foster</Authors>
 	<Company>Your IT Group</Company>
